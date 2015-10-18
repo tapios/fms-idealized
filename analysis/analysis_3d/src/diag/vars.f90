@@ -44,6 +44,7 @@ module vars
        virtual_temp_grid,  &   ! virtual temperature
        vcos_grid,          &   ! cos(lat) * v
        w_grid,             &   ! vertical velocity (full levels)
+       w_pressure,         &   ! vertical pressure velocity
        p_half,             &   ! pressure on half levels
        p_full,             &   ! pressure on full levels
        sfctn_grid,         &   ! streamfunction
@@ -58,9 +59,14 @@ module vars
        rhum_grid               ! relative humidity
 
   real, allocatable, dimension(:,:)  ::                                       &
+       p_half_zon,               &   ! pressure on half levels
        ts_grid,            &   ! surface temperature
        ps_grid,            &   ! surface pressure
        geopot_sfc,         &   ! surface geopotential
+       ucos_zon_spec_barotr,  &   ! u*cos(lat) as func. of wavenumber (vert. avg.)
+       vcos_zon_spec_barotr,  &   ! v*cos(lat) as func. of wavenumber (vert. avg.)
+       vort_zon_spec_barotr,  &   ! vort as func. of wavenumber (vert. avg.)
+       shum_zon_spec_barotr,  &   ! shum as func. of wavenumber (vert. avg.)
        precip_cond_grid,   &   ! large scale cond precipitation
        precip_conv_grid,   &   ! convection precipitation
        sfc_flux_lh_grid,   &
@@ -160,10 +166,14 @@ module vars
        k_asfc                  ! index of lowest isentropic layer above surface
 
 ! --------- time averaged gridpoint variables on pressure surfaces ---------
+       
+  real, allocatable, dimension(:) ::                                            &
+       ps_avg_zon                    ! zonal average surface pressure
 
   real, allocatable, dimension(:, :,:) ::                                       &
        p_mean,                   &   ! pressure
        p_var,                    &   ! pressure variance
+       w_pressure_avg,           &   ! vertical pressure velocity
        specific_vol_avg,         &   ! specific volume
        dens_avg,                 &   ! specific volume
        u_avg,                    &   ! zonal wind
@@ -181,6 +191,11 @@ module vars
        MTEM_res_circ,            &   ! Modified TEM residual circulation
        vort_avg,                 &   ! vorticity
        vort_var_avg,             &   ! vorticity variance
+       zonal_vort_flux_avg,      &   ! zonal vorticity flux
+       mrdnl_vort_flux_avg,      &   ! meridional vorticity flux
+       vrtcl_vort_flux_avg,      &   ! vertical vorticity flux
+       vrtcl_p_vort_flux_avg,    &   ! vertical vorticity flux by pressure velocity
+       vort_div_avg,             &   ! nonlineear vortex stretching
        w_avg,                    &   ! vertical wind (w =  \dot\sigma)
        w_var_avg,                &   ! vertical wind variance
        temp_avg,                 &   ! temperature
@@ -188,6 +203,7 @@ module vars
        zonal_temp_flux_avg,      &   ! u*temp
        mrdnl_temp_flux_avg,      &   ! zonal mean [ psfc * v * cos(lat) * temp ]
        vrtcl_temp_flux_avg,      &   ! vertical temperature flux
+       vrtcl_p_temp_flux_avg,    &   ! vertical temperature flux by pressure velocity
        zonal_eddy_temp_flux_avg, &   ! zonal eddy temperature flux
        mrdnl_eddy_temp_flux_avg, &   ! meridional eddy temperature flux
        vrtcl_eddy_temp_flux_avg, &   ! vertical eddy temperature flux
@@ -197,6 +213,7 @@ module vars
        zonal_pot_temp_flux_avg,      &
        mrdnl_pot_temp_flux_avg,      &   ! zonal mean [ psfc * v * cos(lat) * pot_temp ]
        vrtcl_pot_temp_flux_avg,      &   ! vertical heat flux
+       vrtcl_p_pot_temp_flux_avg,    &   ! vertical pot temp flux by pressure velocity
        zonal_eddy_pot_temp_flux_avg, &
        mrdnl_eddy_pot_temp_flux_avg, &  ! meridional eddy heat flux
        vrtcl_eddy_pot_temp_flux_avg, &  ! vertical eddy heat flux
@@ -342,6 +359,7 @@ module vars
        moisture,           &   ! flag to analyze moisture
        virtual,            &   ! flag for virtual temp effect for z and svol
        bucket,             &   ! flag to analyse hydrology
+       everything,         &   ! flag to analyze lots of extra stuff
        moist_isentropes        ! flag to analyze data on moist isentropes
   
   real ::                                                                     &
@@ -425,11 +443,12 @@ module vars
                             num_pbin,                                         &
                            isentrope,          precip_daily_threshold,        &
                              virtual,                          bucket,        &
-                        num_segments
+                          everything,                    num_segments
 
 
   namelist /filename_list/                                                    &
-                       InputFileName,                  OutputFileName
+                       InputFileName,                  SGInputFileName,   &
+                      OutputFileName
 
   contains
 
@@ -464,7 +483,7 @@ module vars
       allocate(            ps_grid(num_lon, num_lat))
       allocate(             p_half(num_lon, num_lat, num_lev+1))
       allocate(             p_full(num_lon, num_lat, num_lev))
-
+      allocate(         w_pressure(num_lon, num_lat, num_lev))
 
       allocate(             u_grid(num_lon, num_lat, num_lev))
       allocate(             v_grid(num_lon, num_lat, num_lev))
@@ -523,14 +542,21 @@ module vars
       allocate(     dt_temp_rad_grid(num_lon, num_lat, num_lev))
       allocate(      dt_temp_sw_grid(num_lon, num_lat, num_lev))
 
+      allocate(  ucos_zon_spec_barotr(num_lat, 0:num_fourier))
+      allocate(  vcos_zon_spec_barotr(num_lat, 0:num_fourier))
+      allocate(  vort_zon_spec_barotr(num_lat, 0:num_fourier))
+      allocate(  shum_zon_spec_barotr(num_lat, 0:num_fourier))
 
 
 ! --------- time-averaged gridpoint variables on pressure surfaces ---------
-      allocate(                ts_avg(num_lon, num_lat))
-      allocate(                ps_avg(num_lon, num_lat))
+      allocate(                    ts_avg(num_lon, num_lat))
+      allocate(                    ps_avg(num_lon, num_lat))
+      allocate(              p_half_zon(num_lat, num_lev+1))
+      allocate(                         ps_avg_zon(num_lat))
       allocate(                ps_var_avg(num_lon, num_lat))
       allocate(                p_mean(num_lon, num_lat, num_lev   ))
       allocate(                p_var(num_lon, num_lat, num_lev    ))
+      allocate(         w_pressure_avg(num_lon, num_lat, num_lev    ))
       allocate(       specific_vol_avg(num_lon, num_lat, num_lev  ))
       allocate(               dens_avg(num_lon, num_lat, num_lev  ))
 
@@ -557,6 +583,11 @@ module vars
 
       allocate(               vort_avg(num_lon, num_lat, num_lev  ))
       allocate(           vort_var_avg(num_lon, num_lat, num_lev  ))
+      allocate(    zonal_vort_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate(    mrdnl_vort_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate(    vrtcl_vort_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate(  vrtcl_p_vort_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate(           vort_div_avg(num_lon, num_lat, num_lev  ))
 
       allocate(                  w_avg(num_lon, num_lat, num_lev  ))
       allocate(              w_var_avg(num_lon, num_lat, num_lev  ))
@@ -566,6 +597,7 @@ module vars
       allocate(     zonal_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(     mrdnl_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(     vrtcl_temp_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate(   vrtcl_p_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(zonal_eddy_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(mrdnl_eddy_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(vrtcl_eddy_temp_flux_avg(num_lon, num_lat, num_lev  ))
@@ -576,6 +608,7 @@ module vars
       allocate(   zonal_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(   mrdnl_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(   vrtcl_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
+      allocate( vrtcl_p_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(  zonal_eddy_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(  mrdnl_eddy_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
       allocate(  vrtcl_eddy_pot_temp_flux_avg(num_lon, num_lat, num_lev  ))
@@ -792,9 +825,11 @@ module vars
 
       ts_avg                  =  0.0
       ps_avg                  =  0.0
+      ps_avg_zon              =  0.0
       ps_var_avg              =  0.0
       p_mean                  =  0.0
       p_var                   =  0.0
+      w_pressure_avg          =  0.0
       specific_vol_avg        =  0.0
       dens_avg                =  0.0
 
@@ -820,6 +855,11 @@ module vars
 
       vort_avg                =  0.0
       vort_var_avg            =  0.0
+      zonal_vort_flux_avg     =  0.0
+      mrdnl_vort_flux_avg     =  0.0
+      vrtcl_vort_flux_avg     =  0.0
+      vrtcl_p_vort_flux_avg   =  0.0
+      vort_div_avg            =  0.0
 
       w_avg                   =  0.0
       w_var_avg               =  0.0
@@ -829,6 +869,7 @@ module vars
       zonal_temp_flux_avg     =  0.0
       mrdnl_temp_flux_avg     =  0.0
       vrtcl_temp_flux_avg     =  0.0
+      vrtcl_p_temp_flux_avg   =  0.0
       zonal_eddy_temp_flux_avg     =  0.0
       mrdnl_eddy_temp_flux_avg     =  0.0
       vrtcl_eddy_temp_flux_avg     =  0.0
@@ -839,6 +880,7 @@ module vars
       zonal_pot_temp_flux_avg    =  0.0
       mrdnl_pot_temp_flux_avg    =  0.0
       vrtcl_pot_temp_flux_avg    =  0.0
+      vrtcl_p_pot_temp_flux_avg  =  0.0
       zonal_eddy_pot_temp_flux_avg    =  0.0
       mrdnl_eddy_pot_temp_flux_avg    =  0.0
       vrtcl_eddy_pot_temp_flux_avg    =  0.0
@@ -922,6 +964,10 @@ module vars
       dt_temp_rad_avg         = 0.0 
       dt_temp_sw_avg          = 0.0 
       
+      ucos_zon_spec_barotr       =  0.0
+      vcos_zon_spec_barotr       =  0.0
+      vort_zon_spec_barotr       =  0.0
+      shum_zon_spec_barotr       =  0.0
       pot_temp_spec              =  0.0
       pot_temp_e_spec            =  0.0
       eape2eke_conv_spec         =  0.0

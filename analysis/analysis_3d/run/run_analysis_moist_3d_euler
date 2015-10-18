@@ -1,12 +1,12 @@
 #!/bin/csh -f
 #BSUB -n 1
-#BSUB -W 12:00
+#BSUB -W 4:00
 #BSUB -J analysis3d
 #BSUB -o ../out_err/out.analysis.%J
 #BSUB -e ../out_err/err.analysis.%J
 #BSUB -L /bin/csh 
 #BSUB -R "rusage[scratch=320000]" 
-#BSUB -R "rusage[mem=56000]"
+#BSUB -R "rusage[mem=80000]"
 
 #Note: 320000 MB scratch space and 56000 MB RAM should work for output of up to 90 days (T85, 180 days at T42)
 
@@ -125,6 +125,7 @@ while ($isegment <= $num_segments)
   set filename_list = `cat -e` <<EOF
     &filename_list
       InputFileName = '$input_dir/$date_name.${fms_output_freq}.nc',
+      SGInputFileName = '$input_dir/$date_name.${fms_output_freq}.nc',
       OutputFileName = '$output_file_name'/
 EOF
     
@@ -136,7 +137,7 @@ EOF
       data_source = 1,
       num_fourier = $num_fourier,
       TimeIn     = $TimeIn, 
-      smooth_surface = .true.,
+      smooth_surface = .false.,
       MaxIsentrLev = 100,
       PotTempMin = $PotTmin,
       PotTempMax = $PotTmax,
@@ -147,6 +148,7 @@ EOF
       TempVarName = 'temp',
       TSVarName = 't_surf',
       PSVarName = 'ps',
+      SGVarName = 'zsurf',
       ShumVarName = 'sphum',
       CondVarName = 'dt_qg_condensation',
       ConvVarName = 'dt_qg_convection',
@@ -164,8 +166,8 @@ EOF
       DiabCondVarName = 'dt_tg_condensation',
       DiabConvVarName = 'dt_tg_convection',
       DiabDiffVarName = 'dt_tg_diffusion',
-      DiabRadVarName = 'tdt_rad',
-      DiabSWVarName = 'tdt_solar', 
+      DiabRadVarName = 'dt_tg_radiation',
+      DiabSWVarName = 'dt_tg_solar', 
       BucketDepthVarName = 'bucket_depth', 
       BucketDepthConvVarName = 'bucket_depth_conv',
       BucketDepthCondVarName = 'bucket_depth_cond', 
@@ -175,11 +177,12 @@ EOF
       DragLHVarName = 'drag_coeff_lh',
       DragSHVarName = 'drag_coeff_sh',
       is_gaussian = .true.,
-      isentrope = .true., 
-      eddy_fluxes = .true.,
+      isentrope = .false., 
+      eddy_fluxes = .false.,
       moisture  = .true.,
-      virtual   = .true.,
+      virtual   = .false.,
       bucket    = .false.,
+      everything = .false.,
       precip_daily_threshold = 1.1574e-5,
       moist_isentropes = .false.,
       num_segments = ${num_segments},

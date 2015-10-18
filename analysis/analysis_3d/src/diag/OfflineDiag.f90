@@ -23,7 +23,7 @@ program offlinediag
                       pot_temp_deriv,                  vrtcl_gradient,        &
                       mrdnl_gradient,                       vrtcl_int,        &
                              pdf_avg,                    sigma_avg_3d,        &
-                   divide_by_psfc_3d        
+                   divide_by_psfc_3d,                  zonal_gradient        
 
   use constants_and_switches_mod, only:                                       &
             reference_sea_level_pres,                              cp,        &
@@ -368,15 +368,29 @@ contains
 
 ! Pressure and density
 
-    ps_avg          = ps_avg           + ps_grid 
-    ps_var_avg      = ps_var_avg       + ps_grid*ps_grid
+    p_half_zon       = mrdnl_avg(p_half) 
+    ps_avg_zon       = ps_avg_zon       + p_half_zon(:, num_lev+1)
+    ps_avg           = ps_avg           + ps_grid 
+    ps_var_avg       = ps_var_avg       + ps_grid*ps_grid
     p_mean           = p_mean            + p_full
     p_var            = p_var             + p_full*p_full
-
+    do k = 1, num_lev   ! vertical pressure velocity from surface pressure gradients
+       w_pressure(:,:,k) = sigma(k)*u_grid(:,:,k)*zonal_gradient(ps_grid, deg_lat, deg_lon) +   &
+                           sigma(k)*v_grid(:,:,k)*mrdnl_gradient(ps_grid, deg_lat, deg_lon) +   &
+                           w_grid(:,:,k)*ps_grid
+    enddo
+    w_pressure_avg   = w_pressure_avg    + sigma_avg_3d(w_pressure, ps_grid)
     ts_avg           = ts_avg            + ts_grid
 
     specific_vol_avg = specific_vol_avg  + sigma_avg_3d(rdgas*virtual_temp_grid/p_full,  &
          ps_grid)
+
+! Pressure velocity vertical fluxes for analysis in pressure coordinates
+
+   vrtcl_p_pot_temp_flux_avg = vrtcl_p_pot_temp_flux_avg +              &
+                               sigma_avg_3d(w_pressure*pot_temp_grid, ps_grid)
+   vrtcl_p_temp_flux_avg     = vrtcl_p_temp_flux_avg + sigma_avg_3d(w_pressure*temp_grid, ps_grid)
+   vrtcl_p_vort_flux_avg     = vrtcl_p_vort_flux_avg + sigma_avg_3d(w_pressure*vor_grid, ps_grid)
 
 ! Zonal Winds
 
@@ -391,6 +405,9 @@ contains
        ucos_grid(:,:,k) = u_grid(:,:,k) * cos_lat_xy
     end do
 
+    ucos_zon_spec_barotr    = ucos_zon_spec_barotr  +                               &
+         zonal_spectrum_grid(p_half_zon, ucos_grid)     
+
 ! Meridional Winds
 
     v_avg               = v_avg             + sigma_avg_3d(v_grid, ps_grid)
@@ -400,8 +417,16 @@ contains
     vcos_avg           = vcos_avg          + sigma_avg_3d(vcos_grid, ps_grid)
     vort_avg           = vort_avg          + sigma_avg_3d(vor_grid, ps_grid)
     vort_var_avg       = vort_var_avg      + sigma_avg_3d(vor_grid**2, ps_grid)
+    zonal_vort_flux_avg = zonal_vort_flux_avg  + sigma_avg_3d(vor_grid*u_grid, ps_grid)
+    mrdnl_vort_flux_avg = mrdnl_vort_flux_avg  + sigma_avg_3d(vor_grid*vcos_grid, ps_grid)
+    vrtcl_vort_flux_avg = vrtcl_vort_flux_avg  + sigma_avg_3d(vor_grid*w_grid, ps_grid)
+    vort_div_avg        = vort_div_avg         + sigma_avg_3d(vor_grid*div_grid, ps_grid)
     v_var_avg          = v_var_avg         + sigma_avg_3d(v_grid**2, ps_grid)
 
+    vcos_zon_spec_barotr    = ucos_zon_spec_barotr  +                               &
+         zonal_spectrum_grid(p_half_zon, vcos_grid)     
+    vort_zon_spec_barotr    = vort_zon_spec_barotr  +                               &
+         zonal_spectrum_grid(p_half_zon, vor_grid)     
 
     sfctn_avg        = sfctn_avg         +                                    &
         interpolate_half_to_full(sfctn_grid)
@@ -454,6 +479,9 @@ contains
        mrdnl_shum_flux_avg = mrdnl_shum_flux_avg  + sigma_avg_3d(shum_grid*vcos_grid, ps_grid)
        vrtcl_shum_flux_avg = vrtcl_shum_flux_avg  + sigma_avg_3d(shum_grid*w_grid, ps_grid)  
 
+       shum_zon_spec_barotr    = shum_zon_spec_barotr  +                               &
+         zonal_spectrum_grid(p_half_zon, shum_grid)     
+    
        sat_shum_avg     = sat_shum_avg       + sigma_avg_3d(sat_shum_grid, ps_grid) 
        sat_shum_var_avg = sat_shum_var_avg   + sigma_avg_3d(sat_shum_grid**2, ps_grid)
 
@@ -648,7 +676,8 @@ contains
     ts_avg               = ts_avg / dof
     ps_avg               = ps_avg / dof  
     ps_var_avg           = ps_var_avg / dof
-    specific_vol_avg     = divide_by_psfc_3d(specific_vol_avg/dof,     ps_avg)
+    w_pressure_avg       = divide_by_psfc_3d(w_pressure_avg/dof,     ps_avg)
+    specific_vol_avg     = divide_by_psfc_3d(specific_vol_avg/dof,   ps_avg)
 
     u_avg                = divide_by_psfc_3d(u_avg/dof,              ps_avg)
     u_var_avg            = divide_by_psfc_3d(u_var_avg/dof,          ps_avg)
@@ -659,6 +688,12 @@ contains
     u_barotr_var_avg     = u_barotr_var_avg / (dof * ps_avg )
     v_barotr_var_avg     = v_barotr_var_avg / (dof * ps_avg )
 
+    do i=1, num_lat
+       ucos_zon_spec_barotr(i,:) = ucos_zon_spec_barotr(i,:) / (dof * ps_avg_zon(i))
+       vcos_zon_spec_barotr(i,:) = vcos_zon_spec_barotr(i,:) / (dof * ps_avg_zon(i))
+       vort_zon_spec_barotr(i,:) = vort_zon_spec_barotr(i,:) / (dof * ps_avg_zon(i))
+    enddo
+    
     v_avg                = divide_by_psfc_3d(v_avg/dof,              ps_avg)
     v_var_avg            = divide_by_psfc_3d(v_var_avg/dof,          ps_avg)
     vcos_avg             = divide_by_psfc_3d(vcos_avg/dof,           ps_avg) 
@@ -666,6 +701,11 @@ contains
     sfctn_var_avg        = sfctn_var_avg       / dof
     vort_avg             = divide_by_psfc_3d(vort_avg/dof,           ps_avg)
     vort_var_avg         = divide_by_psfc_3d(vort_var_avg/dof,       ps_avg)
+    zonal_vort_flux_avg  = divide_by_psfc_3d(zonal_vort_flux_avg/dof,  ps_avg)
+    mrdnl_vort_flux_avg  = divide_by_psfc_3d(mrdnl_vort_flux_avg/dof,  ps_avg)
+    vrtcl_vort_flux_avg  = divide_by_psfc_3d(vrtcl_vort_flux_avg/dof,  ps_avg)
+    vrtcl_p_vort_flux_avg = divide_by_psfc_3d(vrtcl_p_vort_flux_avg/dof,  ps_avg)
+    vort_div_avg         = divide_by_psfc_3d(vort_div_avg/dof       ,  ps_avg)
     w_avg                = divide_by_psfc_3d(w_avg/dof,              ps_avg) 
     w_var_avg            = divide_by_psfc_3d(w_var_avg/dof,          ps_avg)
 
@@ -674,6 +714,7 @@ contains
     zonal_pot_temp_flux_avg = divide_by_psfc_3d(zonal_pot_temp_flux_avg/dof, ps_avg)
     mrdnl_pot_temp_flux_avg = divide_by_psfc_3d(mrdnl_pot_temp_flux_avg/dof, ps_avg)
     vrtcl_pot_temp_flux_avg = divide_by_psfc_3d(vrtcl_pot_temp_flux_avg/dof, ps_avg)
+    vrtcl_p_pot_temp_flux_avg = divide_by_psfc_3d(vrtcl_p_pot_temp_flux_avg/dof, ps_avg)
     pot_temp_spec_avg                      = pot_temp_spec_avg / dof
     pot_temp_spec_avg(1,:,:)               = 0.25 * pot_temp_spec_avg(1,:,:)
     pot_temp_spec_avg(2:num_fourier+1,:,:) = 0.25 * pot_temp_spec_avg(2:num_fourier+1,:,:)
@@ -684,6 +725,7 @@ contains
     zonal_temp_flux_avg  = divide_by_psfc_3d(zonal_temp_flux_avg/dof,  ps_avg)
     mrdnl_temp_flux_avg  = divide_by_psfc_3d(mrdnl_temp_flux_avg/dof,  ps_avg)
     vrtcl_temp_flux_avg  = divide_by_psfc_3d(vrtcl_temp_flux_avg/dof,  ps_avg)
+    vrtcl_p_temp_flux_avg  = divide_by_psfc_3d(vrtcl_p_temp_flux_avg/dof,  ps_avg)
     virtual_temp_avg     = divide_by_psfc_3d(virtual_temp_avg/dof,   ps_avg)
 
     z_avg                = divide_by_psfc_3d(z_avg/dof,              ps_avg)
@@ -702,6 +744,9 @@ contains
        zonal_shum_flux_avg      = divide_by_psfc_3d(zonal_shum_flux_avg/dof,    ps_avg)
        mrdnl_shum_flux_avg      = divide_by_psfc_3d(mrdnl_shum_flux_avg/dof,    ps_avg)
        vrtcl_shum_flux_avg      = divide_by_psfc_3d(vrtcl_shum_flux_avg/dof,    ps_avg)
+       do i=1, num_lat
+          shum_zon_spec_barotr(i,:) = shum_zon_spec_barotr(i,:) /(dof * ps_avg_zon(i))
+       enddo
       shum_spec_avg                      = shum_spec_avg  / dof
       shum_spec_avg(1,:,:)               = 0.25 * shum_spec_avg(1,:,:)
       shum_spec_avg(2:num_fourier+1,:,:) = 0.25 * shum_spec_avg(2:num_fourier+1,:,:)

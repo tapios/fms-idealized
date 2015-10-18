@@ -174,7 +174,8 @@ contains
 
     ! Define variables
     ! ----------------
-
+    ! VarID used - 1-90, 101-149 (except 111), 221, 227, 231, 232,
+    ! 257, 301-305 (rwills)
 
     call variable_init("p",                                                   &
          "Pressure on Sigma Levels",                                          &
@@ -194,11 +195,19 @@ contains
          surface_switch_3d,                                                      &
          statVarID(2))
 
+if(everything) then
     call variable_init("p_var_sfc",                                               &
          "Surface Pressure Variance",                                                  &
          "Pa.Pa",                                                                &
          surface_switch_3d,                                                      &
          statVarID(232))
+endif
+
+    call variable_init("w_pressure",                                               &
+         "Vertical pressure velocity",                                                  &
+         "Pa/s",                                                                &
+         sigma_switch_3d,                                                      &
+         statVarID(94))
 
     call variable_init("specific_vol",                                        &
          "Specific Volume",                                                   &
@@ -218,11 +227,13 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(6))
 
+if(everything) then
     call variable_init("u_barotr_var",                                        &
          "Barotropic Zonal Wind Variance",                                    &
          "m.m/s/s",                                                           &
          surface_switch_3d,                                                      &
          statVarID(7))
+endif
 
     call variable_init("u_mrdnl_flux",                                        &
          "Meridional Zonal Wind Flux",                                        &
@@ -260,11 +271,43 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(130))
 
+    call variable_init("vort_zonal_flux",                                                   &
+         "Zonal Relative Vorticity Flux",                                                   &
+         "m/s/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(88))
+
+    call variable_init("vort_mrdnl_flux",                                                   &
+         "Meridional Relative Vorticity Flux",                                                   &
+         "m/s/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(89))
+
+    call variable_init("vort_vrtcl_flux",                                                   &
+         "Vertical Relative Vorticity Flux",                                                   &
+         "1/s/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(90))
+
+    call variable_init("vort_vrtcl_p_flux",                                                   &
+         "Pressure-Velocity Relative Vorticity Flux",                                                   &
+         "Pa/s/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(91))
+
+    call variable_init("vort_div",                                                   &
+         "Nonlinear Stretching of Relative Vorticity",                                     &
+         "1/s/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(54))
+
+if(everything) then
     call variable_init("v_barotr_var",                                        &
          "Barotropic Meridional Wind Variance",                               & 
          "m.m/s/s",                                                           &
          surface_switch_3d,                                                      &
          statVarID(15))
+endif
 
     call variable_init("w",                                                   &
          "Vertical Wind; w = \dot\sigma",                                     &
@@ -272,12 +315,13 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(17))
 
+if(everything) then
     call variable_init("w_var",                                               &
          "Vertical Wind Variance",                                            &
          "1/s/s",                                                             &
          sigma_switch_3d,                                                        &
          statVarID(18))
-
+endif
 
     call variable_init("streamfctn",                                          &
          "Eulerian-Mean Meridional Mass Flux Streamfunction",                 &
@@ -285,11 +329,13 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(19))
 
+if(everything) then
     call variable_init("streamfctn_var",                                          &
          "Eulerian-Mean Meridional Mass Flux Streamfunction Variance",                 &
          "kg.kg/s/s",                                                              &
          sigma_switch_3d,                                                        &
          statVarID(129))
+endif
 
     call variable_init("streamfctn_TEM",                                      &
          "TE-Mean Meridional Mass Flux Streamfunction",                       &
@@ -334,6 +380,11 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(25))
 
+    call variable_init("temp_vrtcl_p_flux",                                                   &
+         "Pressure-Velocity Temperature Flux",                                                   &
+         "K.Pa/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(92))
 
     call variable_init("z",                                                   &
          "Geopotential Height",                                               &
@@ -341,11 +392,13 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(28))
 
+if(everything) then
     call variable_init("z_var",                                                   &
          "Geopotential Height Variance",                                               &
          "m.m",                                                                 &
          sigma_switch_3d,                                                        &
          statVarID(127))
+endif
 
     call variable_init("z_zonal_flux",                                        &
          "Zonal Geopotential Height Flux",                               &
@@ -395,11 +448,14 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(36))
 
+
+if(everything) then
     call variable_init("pot_temp_mrdnl_deriv",                                &
          "Meridional Potential Temperature Gradient",                         &
          "K/m",                                                               &
          sigma_switch_3d,                                                        &
          statVarID(39))
+endif
 
     call variable_init("pot_temp_vrtcl_deriv",                                &
          "Vertical Potential Temperature Gradient",                           &
@@ -407,6 +463,11 @@ contains
          sigma_switch_3d,                                                        &
          statVarID(40))
 
+    call variable_init("pot_temp_vrtcl_p_flux",                                                   &
+         "Pressure-Velocity Potential Temperature Flux",                                                   &
+         "K.Pa/s",                                                               &
+         sigma_switch_3d,                                                        &
+         statVarID(93))
 
     call variable_init("pot_temp_psd",                                        &
         "Potential Temperature Horizontal Power Spectral Density",            &
@@ -423,11 +484,31 @@ contains
     call check(nf90_put_att(ncFileID, statVarID(42),                         &
          "_FillValue", gspval ) )
 
+if(everything) then
    call variable_init("eape2eke_flux_psd",                                    &
        "EAPE to EKE Conversion Horizontal Power Spectral Density",            &
        "K.m/s",                                                               &
        spectra_switch_3d,                                                     &
        statVarID(43))
+endif
+
+   call variable_init("ucos_zon_psd_barotr",                                 &
+        "Zonal Wind (cos) Barotropic Zonal Power Spectral Density",          &
+        "m.m/s/s",                                                           &
+        zon_wave_switch,                                                     &
+        statVarID(12))
+
+   call variable_init("vcos_zon_psd_barotr",                                 &
+        "Meridional Wind (cos) Barotropic Zonal Power Spectral Density",     &
+        "m.m/s/s",                                                           &
+        zon_wave_switch,                                                     &
+        statVarID(16))
+
+   call variable_init("vort_zon_psd_barotr",                                 &
+        "Relative Vorticity Barotropic Zonal Power Spectral Density",        &
+        "m/s/s",                                                             &
+        zon_wave_switch,                                                     &
+        statVarID(133))
 
     if(moisture) then
 
@@ -445,11 +526,13 @@ contains
             statVarID(44))
        
 
+if(everything) then
        call variable_init("shum_var",                                         &
             "Specific Humidity Variance",                                     &
             "kg/kg kg/kg",                                                    &
             sigma_switch_3d,                                                     &
             statVarID(45))
+endif
 
        call variable_init("shum_zonal_flux",                                  &
             "Zonal Specific Humidity Flux",                              &
@@ -487,6 +570,7 @@ contains
             sigma_switch_3d,                                                     &
             statVarID(152))
 
+if(everything) then
        call variable_init("shum_cond_prob",                                   &
             "Probability of Large-Scale Condensation Event",                  &
             "none",                                                           &
@@ -498,12 +582,19 @@ contains
             "none",                                                           &
             sigma_switch_3d,                                                     &
             statVarID(53))
+endif
 
        call variable_init("shum_psd",                                         &
             "Specific Humidity Zonal Power Spectral Density",                 &
             "kg/kg.kg/kg",                                                    &
             spectra_switch_3d,                                                &
             statVarID(55))
+
+       call variable_init("shum_zon_psd_barotr",                                 &
+            "Specific Humidity Barotropic Zonal Power Spectral Density",         &
+            "m.m/s/s",                                                           &
+            zon_wave_switch,                                                     &
+            statVarID(134))
 
 
        call variable_init("shum_sat",                                         &
@@ -513,11 +604,13 @@ contains
             statVarID(56))
 
 
+if(everything) then
        call variable_init("shum_sat_var",                                     &
             "Saturation Specific Humidity Variance",                          &
             "kg/kg.kg/kg",                                                    &
             sigma_switch_3d,                                                     &
             statVarID(57))
+endif
 
        call variable_init("shum_drag_coeff",                                  &
             "Aerodynamic drag coefficient for moisture flux at surface",      &
@@ -701,6 +794,7 @@ contains
             sigma_switch_3d,                                                     &
             statVarID(87))
 
+if(everything) then
        call variable_init("precip_cond_pdf",                                     &
             "Daily Grid Scale Precipitation Excedance Frequency",        &
             "none",                                                           &
@@ -712,6 +806,7 @@ contains
             "none",                                                           &
             pdf_switch,                                                          &
             statVarID(132))
+endif
 
        call variable_init("precip_tot_pdf",                                      &
             "Total Daily Precipitation Excedance Frequency",                   &
@@ -951,7 +1046,6 @@ contains
 !            statVarID(119))
 
 
-
         if(moisture) then
            call variable_init("shum_isent",                                           &
                 "Specific Humidity",                                                  &
@@ -1182,12 +1276,16 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(2), ps_avg,                                  &
          start = (/ 1, 1 /), count = (/num_lon, num_lat /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(232), ps_var_avg,                                  &
          start = (/ 1, 1 /), count = (/num_lon, num_lat /) ))
+endif
 
+    call check(nf90_put_var(ncFileID, statVarID(94), w_pressure_avg,                        &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
     call check(nf90_put_var(ncFileID, statVarID(4), specific_vol_avg,                        &
-         start = (/ 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
 
 
@@ -1197,8 +1295,10 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(6), u_var_avg,                               &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(7), u_barotr_var_avg,                        &
          start = (/ 1, 1 /), count = (/num_lon, num_lat /) ))
+endif
 
     call check(nf90_put_var(ncFileID, statVarID(8), mrdnl_u_flux_avg,                       &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
@@ -1219,8 +1319,10 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(14), v_var_avg,                               &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(15), v_barotr_var_avg,                        &
          start = (/ 1, 1 /), count = (/num_lon, num_lat /) ))
+endif
 
 
     call check(nf90_put_var(ncFileID, statVarID(128), vort_avg,                                   &
@@ -1229,19 +1331,37 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(130), vort_var_avg,                               &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+    call check(nf90_put_var(ncFileID, statVarID(88), zonal_vort_flux_avg,                                   &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
+    call check(nf90_put_var(ncFileID, statVarID(89), mrdnl_vort_flux_avg,                                   &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
+    call check(nf90_put_var(ncFileID, statVarID(90), vrtcl_vort_flux_avg,                                   &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
+    call check(nf90_put_var(ncFileID, statVarID(91), vrtcl_p_vort_flux_avg,                                   &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
+    call check(nf90_put_var(ncFileID, statVarID(54), vort_div_avg,                                   &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
 
     call check(nf90_put_var(ncFileID, statVarID(17), w_avg,                                   &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(18), w_var_avg,                               &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
-
+endif
 
     call check(nf90_put_var(ncFileID, statVarID(19), sfctn_avg,                               &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(129), sfctn_var_avg,                          &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+endif
 
     call check(nf90_put_var(ncFileID, statVarID(20), TEM_res_circ,                            & 
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
@@ -1264,6 +1384,9 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(25), vrtcl_temp_flux_avg,                     &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+    call check(nf90_put_var(ncFileID, statVarID(92), vrtcl_p_temp_flux_avg,                     &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
     call check(nf90_put_var(ncFileID, statVarID(137), zonal_eddy_temp_flux_avg,                &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
@@ -1276,8 +1399,10 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(28), z_avg,                                   &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(127), z_var_avg,                                   &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) ))
+endif
 
     call check(nf90_put_var(ncFileID, statVarID(140), zonal_z_flux_avg,                        &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
@@ -1313,6 +1438,9 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(36), vrtcl_pot_temp_flux_avg,                 &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+    call check(nf90_put_var(ncFileID, statVarID(93), vrtcl_p_pot_temp_flux_avg,                 &
+         start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+
     call check(nf90_put_var(ncFileID, statVarID(139), zonal_eddy_pot_temp_flux_avg,            &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
@@ -1322,8 +1450,10 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(38), vrtcl_eddy_pot_temp_flux_avg,            &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(39), d_dy_pot_temp_avg,                       &
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) )) 
+endif
 
     call check(nf90_put_var(ncFileID, statVarID(40), d_dp_pot_temp_avg,                       &
          start = (/ 1, 1, 1 /), count = (/num_lon,num_lat, num_lev/) )) 
@@ -1334,8 +1464,19 @@ contains
     call check(nf90_put_var(ncFileID, statVarID(42), buoyancy_freq_avg,                       & 
          start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) ))
 
+if(everything) then
     call check(nf90_put_var(ncFileID, statVarID(43), eape2eke_conv_spec,                      &
             start = (/ 1, 1, 1 /), count = (/ num_fourier+1, num_fourier+1, num_lev /) ))
+endif
+    
+    call check(nf90_put_var(ncFileID, statVarID(12), ucos_zon_spec_barotr,                    &
+            start = (/ 1, 1 /), count = (/ num_lat, num_fourier /) ))
+    
+    call check(nf90_put_var(ncFileID, statVarID(16), vcos_zon_spec_barotr,                    &
+            start = (/ 1, 1 /), count = (/ num_lat, num_fourier /) ))
+    
+    call check(nf90_put_var(ncFileID, statVarID(133), vort_zon_spec_barotr,                    &
+            start = (/ 1, 1 /), count = (/ num_lat, num_fourier /) ))
     
     if(moisture) then
 
@@ -1346,8 +1487,10 @@ contains
        call check(nf90_put_var(ncFileID, statVarID(44), shum_avg,                             &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
        
+if(everything) then
        call check(nf90_put_var(ncFileID, statVarID(45), shum_var_avg,                         &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) )) 
+endif
 
        call check(nf90_put_var(ncFileID, statVarID(142), zonal_shum_flux_avg,                  &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
@@ -1377,21 +1520,28 @@ contains
        call check(nf90_put_var(ncFileID, statVarID(152), dt_shum_diff_avg,                     &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
        call check(nf90_put_var(ncFileID, statVarID(52), shum_cond_prob_avg,                   &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
        call check(nf90_put_var(ncFileID, statVarID(53), shum_conv_prob_avg,                   &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
+endif
 
        call check(nf90_put_var(ncFileID, statVarID(55), shum_spec,                            &
             start = (/ 1, 1, 1 /), count = (/ num_fourier+1, num_fourier+1, num_lev /) ))
 
+       call check(nf90_put_var(ncFileID, statVarID(134), shum_zon_spec_barotr,                    &
+            start = (/ 1, 1 /), count = (/ num_lat, num_fourier /) ))
+    
 
        call check(nf90_put_var(ncFileID, statVarID(56), sat_shum_avg,                         &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) )) 
 
+if(everything) then
        call check(nf90_put_var(ncFileID, statVarID(57), sat_shum_var_avg,                     &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev/) )) 
+endif
 
        call check(nf90_put_var(ncFileID, statVarID(257), drag_coeff_lh_avg,                   &
             start = (/ 1, 1 /), count = (/num_lon, num_lat /) ))
@@ -1497,11 +1647,13 @@ contains
        call check(nf90_put_var(ncFileID, statVarID(87), dt_temp_sw_avg,                      &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_lev /) ))
 
+if(everything) then
        call check(nf90_put_var(ncFileID, statVarID(131), precip_cond_pdf,                      &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_bin /) ))
 
        call check(nf90_put_var(ncFileID, statVarID(132), precip_conv_pdf,                      &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_pbin /) ))
+endif
 
        call check(nf90_put_var(ncFileID, statVarID(231), precip_tot_pdf,                      &
             start = (/ 1, 1, 1 /), count = (/num_lon, num_lat, num_pbin /) ))

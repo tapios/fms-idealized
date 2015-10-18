@@ -17,7 +17,8 @@ public ::             mrdnl_gradient,                  vrtcl_gradient,        &
                residual_circulations,               tetens_sat_mr_mod,        &
                 compute_geopotential,                         pdf_avg,        &
                        simple_sat_mr,                    sigma_avg_3d,        &
-                   divide_by_psfc_3d,             multiply_by_psfc_3d
+                   divide_by_psfc_3d,             multiply_by_psfc_3d,        &
+                      zonal_gradient
 
 !interface pdf_avg
 !   module procedure pdf_avg_xyz
@@ -37,6 +38,11 @@ end interface
 interface mrdnl_gradient
    module procedure mrdnl_gradient_yz
    module procedure mrdnl_gradient_xyz
+   module procedure mrdnl_gradient_xy
+end interface
+
+interface zonal_gradient
+   module procedure zonal_gradient_xy
 end interface
 
 interface interpolate_half_to_full
@@ -115,7 +121,7 @@ contains
 
   function mrdnl_gradient_xyz(field_xyz, deg_lat )
 
-    ! compute meridional gradient of zonal-mean field field_yz
+    ! compute meridional gradient of field field_xyz
 
 !                            --- input arguments ---                           
 
@@ -158,6 +164,110 @@ contains
          / ( merid_dist(nj) - merid_dist(nj-1) )
 
   end function mrdnl_gradient_xyz
+
+!----------------------------------------------------------------------------- 
+
+  function mrdnl_gradient_xy(field_xy, deg_lat, deg_lon )
+
+    ! compute meridional gradient of field field_xy
+
+!                            --- input arguments ---                           
+
+    real, dimension(:), intent(in) ::                                         &
+         deg_lat,         &    ! one-dimensional latitude array (in degrees)
+         ! deg_lon is unused, but is needed to recognize field_xy from field_yz
+         deg_lon               ! one-dimensional longitude array (in degrees)
+
+    real, dimension(:, :), intent(in) ::                                      &
+         field_xy              ! 2-d array to be differentiated
+
+!                            --- output arguments ---                         
+
+    real, dimension(size(field_xy, 1), size(field_xy, 2)) ::                  &
+         mrdnl_gradient_xy     ! field_xy differentiated WRT latitude
+
+!                            --- local variables ---                           
+
+    real, dimension(size(field_xy, 2)) :: merid_dist 
+    real :: a0, b0, c0
+
+!                            --- executable code ---                           
+
+    merid_dist = deg_lat * pi / 180. * radius
+    nj  = size(field_xy,2)
+    do j=2, nj-1
+       a0 = merid_dist(j+1) - merid_dist(j)
+       b0 = merid_dist(j)   - merid_dist(j-1)
+       c0 = merid_dist(j+1) - merid_dist(j-1)  ! a0 + b0
+       ! meridional gradient by centered differences
+       mrdnl_gradient_xy(:, j) = b0 / a0 / c0 * field_xy(:, j+1)              &
+                   - a0 / b0 / c0 * field_xy(:,j-1)                          &
+                   + (a0 - b0) / a0 / b0 * field_xy(:, j)
+    enddo
+    ! one-sided differences at poles
+    mrdnl_gradient_xy(:, 1) =                                                 &
+         ( field_xy(:, 2) - field_xy(:, 1) )                                  &
+         / ( merid_dist(2) - merid_dist(1) )
+
+    mrdnl_gradient_xy(:, nj) =                                                &
+         ( field_xy(:, nj) - field_xy(:, nj-1) )                              &
+         / ( merid_dist(nj) - merid_dist(nj-1) )
+
+  end function mrdnl_gradient_xy
+
+!----------------------------------------------------------------------------- 
+
+  function zonal_gradient_xy(field_xy, deg_lat, deg_lon )
+
+    ! compute zonal gradient of field field_xy
+
+!                            --- input arguments ---                           
+
+    real, dimension(:), intent(in) ::                                         &
+         deg_lat,       &      ! one-dimensional latitude array (in degrees)
+         deg_lon               ! one-dimensional longitude array (in degrees)
+
+    real, dimension(:, :), intent(in) ::                                      &
+         field_xy              ! 2-d array to be differentiated
+
+!                            --- output arguments ---                         
+
+    real, dimension(size(field_xy, 1), size(field_xy, 2)) ::                  &
+         zonal_gradient_xy     ! field_xy differentiated WRT longitude
+
+!                            --- local variables ---                           
+
+    real, dimension(size(field_xy, 1), size(field_xy, 2)) ::                  &
+         zonal_dist
+    real, dimension(size(field_xy, 2)) ::      &
+         a0, b0, c0
+
+!                            --- executable code ---                           
+
+    nj  = size(field_xy,2)
+    do j = 1, nj
+       zonal_dist(:,j) = deg_lon * pi / 180. * radius * cos(deg_lat(j) * pi / 180)
+    enddo
+    ni  = size(field_xy,1)
+    do i=2, ni-1
+       a0 = zonal_dist(i+1,:) - zonal_dist(i,:)
+       b0 = zonal_dist(i,:)   - zonal_dist(i-1,:)
+       c0 = zonal_dist(i+1,:) - zonal_dist(i-1,:)  ! a0 + b0
+       ! meridional gradient by centered differences
+       zonal_gradient_xy(i, :) = b0 / a0 / c0 * field_xy(i+1, :)              &
+                   - a0 / b0 / c0 * field_xy(i-1, :)                          &
+                   + (a0 - b0) / a0 / b0 * field_xy(i, :)
+    enddo
+    ! wrapping differences at the boundaries
+    zonal_gradient_xy(1, :) = b0 / a0 / c0 * field_xy(2, :)              &
+         - a0 / b0 / c0 * field_xy(ni, :)                          &
+         + (a0 - b0) / a0 / b0 * field_xy(1, :)
+
+    zonal_gradient_xy(ni, :) = b0 / a0 / c0 * field_xy(1, :)              &
+         - a0 / b0 / c0 * field_xy(ni-1, :)                          &
+         + (a0 - b0) / a0 / b0 * field_xy(ni, :)
+  
+  end function zonal_gradient_xy
 
 !----------------------------------------------------------------------------- 
 
