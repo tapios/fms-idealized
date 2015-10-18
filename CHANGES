@@ -1,0 +1,40 @@
+20-Feb-2015    Corrected an error in the way hyperviscous damping for grid tracers was calculated in spectral_dynamics.f90. 
+	       (This previously could lead to noise in tracer fields when damping was applied to tracers advected by a finite volume scheme.)
+
+09-Sep-2014    Several updates by Robb Wills and Toby Bischoff
+	       * Updates to shell scripts to adapt them to new cluster architecture (e.g., keep output on global scratch space).  
+	       * Fixed bug in run script that arose because spectral_dynamics_nml was split between run_test and namelist_moist 
+	       	 (causing the namelist parameters in namelist_moist to be ignored)
+	       * Added shell script for submitting parameter sweeps (subdirectory sub).
+	       * Added optical depth rescaling parameter (as in O'Gorman & Schneider 2008) to radiation.f90.
+
+06-Jun-2014    Added ocean_mask functionality to atmosphere.f90
+
+20-May-2014    * Added a flag do_spec_tracer_filter to spectral_dynamics.f90 so that it can be turned off by default when it adds grid scale noise, 
+	         and on by default for the Titan code where it prevents numerical issues. [Robb Wills]
+               * Turned off atmos_water_correction by default except in Titan. It moves water around unphysically with only minimal gain in global water vapor conservation. [Robb Wills]
+               * Fixed logfile bug in 3d analysis runscripts that somehow crept in after 13-Jul-2011 changes
+
+17-Mar-2014    Corrected various issues in new Titan code (e.g., to ensure methane conservation) [Junjun Liu]
+
+12-Mar-2014    Corrected bugs in the updated radiative transfer code radiation.f90 for the Titan version of the model [Junjun Liu]
+
+21-Mar-2013    Included planetary GCM versions (Jupiter, Saturn, Titan) in online release
+
+21-Mar-2013    Corrected variable type for iv_floor in qe_moist_convection to integer (was real before). 
+	       This should make no difference to results if the code compiled (but it did not compile, e.g., with GNU as iv_floor was used as an array index). 
+	       [This was pointed out by William Cooke, GFDL] 
+
+21-Dec-2012    Fixed bug in time level of specific humidity (erroneously set to 'previous') in call to vert_turb_driver in atmosphere.f90 (pointed out by Peter Phillipps, GFDL) 
+
+04-Oct-2012    Released new model tree with a number of changes. The source now uses the FMS Memphis version, and it contains many updates, including a Robert-Asselin-Williams 
+	       filter for the time stepping (Williams, P. D., 2011: Mon. Wea.Rev., 137, 1996-2007) and options for including land masses with simple (bucket) surface hydrology. 
+
+16-Nov-2011    Corrected an error in the radiative equilibrium temperature formulation in hs_forcing.f90. (This error affected simulations with phi0 .ne. 0. and was pointed out 
+	       by Wenyu Zhou and Tim Merlis.)
+
+05-Aug-2011    Added option for tidally-locked simulations.
+
+13-Jul-2011    Fixed bug in run scripts (run_test), which prevented logfiles from being copied to output directory
+
+18-Apr-2011    Fixed bug in radiation.f90 (error in longwave optical depth calculation)

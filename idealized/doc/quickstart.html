@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta name="generator" content=
+    "HTML Tidy for Linux/x86 (vers 1st September 2002), see www.w3.org">
+    <meta content="text/html; charset=ISO-8859-1" http-equiv=
+    "Content-Type">
+    <title>Quickstart Guide: FMS atmospheric dynamical
+    cores</title>
+    <link rel="stylesheet" href=
+    "http://www.gfdl.noaa.gov/~fms/style/docbook.css" type=
+    "text/css">
+    <meta name="generator" content=
+    "DocBook XSL Stylesheets V1.55.0">
+    <meta name="description" content=
+    "This document describes how to acquire, compile, and run specific test cases of four solo FMS atmospheric dynamical core models. The available codes are a finite-difference B-grid model and spectral model running the Held-Suarez GCM benchmark, and two simple spectral variations, a barotropic model and shallow water model. For more information, see the Jakarta Atmospheric Dynamical Core User's Guide which is included in this package and also accessible from the FMS Homepage.">
+  </head>
+  <body bgcolor="white" text="black" link="#0000FF" vlink="#840084"
+  alink="#0000FF">
+    <div class="article">
+      <div class="titlepage">
+        <div>
+          <h1 class="title"><a name="id2774485"></a>Quickstart
+          Guide: FMS atmospheric dynamical cores</h1>
+        </div>
+        <div>
+          <div class="author">
+            <h3 class="author">Amy Langenhorst</h3>
+          </div>
+        </div>
+        <div>
+          <div class="abstract">
+            <p class="title"><b>Abstract</b></p>
+            <p>This document describes how to acquire, compile, and
+            run specific test cases of four solo FMS atmospheric
+            dynamical core models. The available codes are a
+            finite-difference B-grid model and spectral model
+            running the Held-Suarez GCM benchmark, and two simple
+            spectral variations, a barotropic model and shallow
+            water model.</p>
+            <p>For more information, see the <a href=
+            "dycore_public_manual.html" target="_top">Jakarta
+            Atmospheric Dynamical Core User's Guide</a> which is
+            included in this package and also accessible from the
+            <a href="http://www.gfdl.noaa.gov/~fms" target=
+            "_top">FMS Homepage</a>.</p>
+          </div>
+        </div>
+        <hr>
+      </div>
+      <div class="toc">
+        <p class="subtitle"><b>Table of Contents</b></p>
+        <dl>
+          <dt>1. <a href="#acquire">Acquire the Source
+          Code</a></dt>
+          <dt>2. <a href="#run">Run the Model</a></dt>
+          <dd>
+            <dl>
+              <dt>2.1. <a href="#provided">The Provided Sample
+              Runscripts</a></dt>
+              <dt>2.2. <a href="#description">Functionality of the
+              Sample Runscripts</a></dt>
+              <dt>2.3. <a href="#portability">Portability Issues
+              with the Sample Runscripts</a></dt>
+              <dt>2.4. <a href="#changing">Changing the Sample
+              Runscripts</a></dt>
+            </dl>
+          </dd>
+          <dt>3. <a href="#examine">Examine the Output</a></dt>
+        </dl>
+      </div>
+      <hr>
+      <div class="section">
+        <div class="titlepage">
+          <div>
+            <h2 class="title" style="clear: both"><a name=
+            "acquire"></a>1.&nbsp;Acquire the Source Code</h2>
+          </div>
+        </div>
+        <p>The Flexible Modeling System development team at GFDL
+        uses a local implementation of GForge to serve FMS
+        software, located at <a href="http://fms.gfdl.noaa.gov"
+        target="_top">http://fms.gfdl.noaa.gov</a>. In order to
+        obtain the source code, you must <a href=
+        "https://fms.gfdl.noaa.gov/account/register.php" target=
+        "_top">register</a> as an FMS user on our software server.
+        After submitting the registration form on the software
+        server, you should receive an automatically generated
+        confirmation email within a few minutes. Clicking on the
+        link in the email confirms the creation of your
+        account.</p>
+        <p>After your account has been created, you should <a href=
+        "https://fms.gfdl.noaa.gov/account/login.php" target=
+        "_top">log in</a> and request access to the FMS Atmospheric
+        Dynamical Cores project. Once the FMS project administrator
+        grants you access, you will receive a second e-mail
+        notification. This email requires action on the part of the
+        project administrator and thus may take longer to arrive.
+        The email will contain a software access password along
+        with instructions for obtaining the release package, which
+        are described below.</p>
+        <p>To check out the release package containing source code,
+        scripts, and documentation via CVS, type the following
+        commands into a shell window. You might wish to first
+        create a directory called <tt>fms</tt> in which to run
+        these commands. You should enter the software access
+        password when prompted by the <b>cvs login</b> command. At
+        cvs login, the file <tt>~/.cvspass</tt> is read. If this
+        file does not already exist, an error message may display
+        and the cvs login may fail. In this event, you should first
+        create this file via <b>touch ~/.cvspass</b>.</p>
+<pre class="programlisting">
+cvs -z3 -d:pserver:cvs@fms.gfdl.noaa.gov:/cvsroot/atm-dycores login
+cvs -z3 -d:pserver:cvs@fms.gfdl.noaa.gov:/cvsroot/atm-dycores co -r jakarta atm_dycores
+</pre>
+        <p>This will create a directory called <tt>atm_dycores</tt>
+        in your current working directory containing the release
+        package. The <a href="../readme" target="_top">readme</a>
+        file in the <tt>atm_dycores</tt> directory gives a brief
+        overview of the package's directory structure and
+        contents.</p>
+        <p>If you prefer not to use CVS, you may download the tar
+        file called <tt>atm_dycores.tar.gz</tt> from <a href=
+        "https://fms.gfdl.noaa.gov/projects/atm-dycores/" target=
+        "_top">https://fms.gfdl.noaa.gov/projects/atm-dycores/</a>.
+        Sample output is also available there for download. See <a
+        href="#examine" title=
+        "3.&nbsp;Examine the Output">Section&nbsp;3</a> for more
+        information on the sample output.</p>
+      </div>
+      <div class="section">
+        <div class="titlepage">
+          <div>
+            <h2 class="title" style="clear: both"><a name=
+            "run"></a>2.&nbsp;Run the Model</h2>
+          </div>
+        </div>
+        <div class="section">
+          <div class="titlepage">
+            <div>
+              <h3 class="title"><a name=
+              "provided"></a>2.1.&nbsp;The Provided Sample
+              Runscripts</h3>
+            </div>
+          </div>
+          <p>This release includes four run scripts in the
+          directory <tt>atm_dycores/scripts</tt>. Each runs one of
+          four atmospheric dynamical core models, which are:</p>
+          <div class="itemizedlist">
+            <ul type="disc">
+              <li>
+                <p><span class="emphasis"><em>B-grid</em></span>
+                (<a href="../scripts/run_bgrid" target=
+                "_top">../scripts/run_bgrid</a>)</p>
+                <p>A hydrostatic, finite difference primative
+                equation GCM. A complete description can be found
+                at <a href=
+                "../src/atmos_bgrid/documentation/bgrid.pdf"
+                target=
+                "_top">../src/atmos_bgrid/documentation/bgrid.pdf</a>.</p>
+              </li>
+              <li>
+                <p><span class="emphasis"><em>Spectral</em></span>
+                (<a href="../scripts/run_spectral" target=
+                "_top">../scripts/run_spectral</a>)</p>
+                <p>A hydrostatic, spectral primative equation GCM.
+                A complete description can be found at <a href=
+                "../src/atmos_spectral/documentation/spectral_core.pdf"
+                 target=
+                "_top">../src/atmos_spectral/documentation/spectral_core.pdf</a>.</p>
+              </li>
+              <li>
+                <p><span class="emphasis"><em>Spectral Shallow
+                Water</em></span> (<a href=
+                "../scripts/run_spectral_shallow" target=
+                "_top">../scripts/run_spectral_shallow</a>)</p>
+                <p>A spectral model of shallow incompressible fluid
+                dynamics. A complete description can be found at <a
+                href="../src/atmos_spectral_shallow/shallow.pdf"
+                target=
+                "_top">../src/atmos_spectral_shallow/shallow.pdf</a>.</p>
+              </li>
+              <li>
+                <p><span class="emphasis"><em>Spectral
+                Barotropic</em></span> (<a href=
+                "../scripts/run_spectral_barotropic" target=
+                "_top">../scripts/run_spectral_barotropic</a>)</p>
+                <p>A spectral model of non-divergent incompressible
+                fluid dynamics. A complete description can be found
+                at <a href=
+                "../src/atmos_spectral_barotropic/barotropic.pdf"
+                target=
+                "_top">../src/atmos_spectral_barotropic/barotropic.pdf</a>.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="section">
+          <div class="titlepage">
+            <div>
+              <h3 class="title"><a name=
+              "description"></a>2.2.&nbsp;Functionality of the
+              Sample Runscripts</h3>
+            </div>
+          </div>
+          <p>These runscripts perform the minimum required steps to
+          run the models and are intended only as a starting point
+          for the development of more practical run scripts. The
+          scripts should be executed from the
+          <tt>atm_dycores/scripts</tt> directory. Each of these
+          sample scripts:</p>
+          <div class="itemizedlist">
+            <ul type="disc">
+              <li>
+                <p>compiles the <b>mppnccombine</b> executable for
+                multiprocessing platforms,</p>
+              </li>
+              <li>
+                <p>compiles and links the model source code,</p>
+              </li>
+              <li>
+                <p>creates a working directory where the model will
+                be run,</p>
+              </li>
+              <li>
+                <p>creates or copies the required input data into
+                the working directory, and</p>
+              </li>
+              <li>
+                <p>runs the model.</p>
+              </li>
+            </ul>
+          </div>
+          <p>Note that the directory paths and file paths are
+          variables. They are initially set to correspond to the
+          directory structure as it exists upon CVS checkout, but
+          are made variables to accommodate changes to this
+          directory structure.</p>
+          <p>The diagnostic fields output from the models is
+          mulithreated. That is, each processor writes a separate
+          file which includes data only from its own portion of the
+          globe (its "domain"). A utility named <b>mppnccombine</b>
+          is supplied which is executed after the model execution
+          is complete and which combines these into a single file
+          which covers the entire globe. For a complete description
+          of <b>mppnccombine</b> see the <a href=
+          "../doc/dycore_public_manual.html#mppnccombine" target=
+          "_top">mppnccombine documentation</a> in the user's
+          guide.</p>
+          <p>The output is not moved from the working directory,
+          archiving of output is left to the user. The files needed
+          to restart the model are left in the working directory's
+          subdirectory called <tt>RESTART</tt>. If it is desired to
+          restart the model from this state, do the following:</p>
+          <div class="orderedlist">
+            <ol type="1">
+              <li>Move the files in <tt>$workdir/RESTART</tt> to
+              <tt>$workdir/INPUT</tt>.</li>
+              <li>The <b>mppnccombine</b> utility will not
+              overwrite preexisting diagnostic field files in
+              <tt>$workdir</tt>, so they must be moved or renamed
+              before restarting.</li>
+              <li>Comment the <b>if ( -e $workdir )</b> block in
+              the runscript, which prevents accidental reuse of the
+              working directory.</li>
+              <li>You can then execute the runscript again.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="section">
+          <div class="titlepage">
+            <div>
+              <h3 class="title"><a name=
+              "portability"></a>2.3.&nbsp;Portability Issues with
+              the Sample Runscripts</h3>
+            </div>
+          </div>
+          <p>If you encounter a compile error when executing the
+          sample runscript, please first check whether you have
+          correctly customized your <b>mkmf</b> template. The
+          scripts use the <b>mkmf</b> utility, which creates make
+          files to facilitate compilation. The <b>mkmf</b> utility
+          uses a platform-specific template for setting up system
+          and platform dependent parameters. Sample templates for
+          various platforms are provided in the
+          <tt>atm_dycores/bin</tt> directory. You may need to
+          consult your system administrator to set up a compilation
+          template for your platform and ensure the locations for
+          system libraries are defined correctly. For a complete
+          description of <b>mkmf</b> see the <a href=
+          "../bin/mkmf.html" target="_top">mkmf documentation</a>.
+          The <b><tt>$platform</tt></b> variable in the runscript
+          is used to separate and identify platform-specific items
+          in the runscript, including the <b>mkmf</b> template.</p>
+          <p>The execution is accomplished with a utility called
+          <b>mpirun</b>, which is unique to machines by Silicon
+          Graphics. This may need to be changed to run on other
+          platforms.</p>
+        </div>
+        <div class="section">
+          <div class="titlepage">
+            <div>
+              <h3 class="title"><a name=
+              "changing"></a>2.4.&nbsp;Changing the Sample
+              Runscripts</h3>
+            </div>
+          </div>
+          <div class="section">
+            <div class="titlepage">
+              <div>
+                <h4 class="title"><a name=
+                "length"></a>2.4.1.&nbsp;Changing the length of the
+                run and atmospheric time step</h4>
+              </div>
+            </div>
+            <p>By default the scripts are set up to run only one or
+            two days. The run length is controlled by the namelist
+            <tt>main_nml</tt> which is set directly in the
+            runscripts for convenience. To increase the run length
+            to 200 days, change the namelist parameter
+            <tt>days</tt> in the runscript as follows. The other
+            parameter in the namelist, <tt>dt_atmos</tt>, controls
+            the atmospheric time step.</p>
+<pre class="programlisting">
+ &amp;main_nml
+     days   = 200,
+     dt_atmos = 1800 /
+</pre>
+          </div>
+          <div class="section">
+            <div class="titlepage">
+              <div>
+                <h4 class="title"><a name=
+                "npes"></a>2.4.2.&nbsp;Changing the number of
+                processors</h4>
+              </div>
+            </div>
+            <p>By default the scripts are set up to run with the
+            MPI library, but only on one processor. To increase the
+            number of processors, change the <b><tt>$npes</tt></b>
+            variable at the top of the sample runscript. You may
+            need to consult the documentation for each particular
+            model concerning appropriate processor counts for that
+            model.</p>
+            <p>To run without the MPI library, do the
+            following:</p>
+            <div class="orderedlist">
+              <ol type="1">
+                <li>Make sure you are only using one processor, ie,
+                the variable <b><tt>$npes</tt></b> is set to 1 at
+                the top of the sample runscript.</li>
+                <li>Change the run command in the runscript from
+                "<b><tt>mpirun -np $npes fms.x</tt></b>" to simply
+                "<b><tt>fms.x</tt></b>".</li>
+                <li>Remove the <b><tt>-Duse_libMPI</tt></b> from
+                the <b><tt>mkmf</tt></b> line in the
+                runscript.</li>
+                <li>Remove the <b><tt>-lmpi</tt></b> from the
+                <b><tt>$LIBS</tt></b> variable in your mkmf
+                template.</li>
+                <li>Move or remove your previous compilation
+                directory (specified as <b><tt>$execdir</tt></b> in
+                the runscript) so that all code must be
+                recompiled.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="titlepage">
+          <div>
+            <h2 class="title" style="clear: both"><a name=
+            "examine"></a>3.&nbsp;Examine the Output</h2>
+          </div>
+        </div>
+        <p>You may download sample output data for comparison at <a
+        href="https://fms.gfdl.noaa.gov/projects/atm-dycores/"
+        target=
+        "_top">https://fms.gfdl.noaa.gov/projects/atm-dycores/</a>.
+        Each tar file expands to a directory containing a readme
+        file along with netcdf and ascii output. The files
+        <tt>bgrid_output.tar.gz</tt> and
+        <tt>spectral_output.tar.gz</tt> contain daily snapshots of
+        surface pressure through the 200 day spinup period and time
+        means of all fields over the 200 to 1200 day period. The
+        files <tt>barotropic_output.tar.gz</tt> and
+        <tt>shallow_output.tar.gz</tt> contain thirty days of
+        diagnostic output for the spectral barotropic model and
+        spectral shallow water model respectively.</p>
+      </div>
+    </div>
+  </body>
+</html>

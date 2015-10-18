@@ -1,0 +1,39 @@
+# Empty namelist causes all values to take on default values.
+# The default values for hs_forcing_nml are as described in:
+# Held, I. M., and M. J. Suarez, 1994: A proposal for the intercomparison
+# of the dynamical cores of atmospheric general circulation models.
+# Bulletin of the American Meteorological Society, 75(10), 1825-1830.
+
+ &hs_forcing_nml /
+
+# domains_stack_size will vary for different model resolutions,
+# domain decompositions, and number of processors used.
+
+ &spectral_dynamics_nml
+   do_spec_tracer_filter = .true.  /
+
+ &fms_nml
+    domains_stack_size = 600000 /
+
+ &fms_io_nml
+    threading_write = 'single',
+    fileset_write = 'single' /
+
+ &diffusivity_nml
+   pbl_mcm                 = .false.,
+   free_atm_diff           = .false.,
+   entr_ratio              = 0.0,
+   parcel_buoy             = 0.0,
+   do_virtual_non_mcm      = .true.,
+   fixed_depth             = .false.,
+   frac_inner              = 0.1/
+
+ &monin_obukhov_nml
+   neutral                 = .false.,
+   rich_crit               = 1.0,
+   stable_option           = 1 /
+
+ &surface_flux_nml
+   use_virtual_temp        = .true. /
+
+

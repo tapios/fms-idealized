@@ -1,0 +1,86 @@
+=== Notes on origin of source files ===
+
+This is just based on comparing file names. No note is made here about whether a file has been edited. ADC is the FMS Atmospheric Dynamical Cores, presumably the Jakarta release (2003). am2 is the FMS AM2 model. MOM is the FMS MOM model. Oth, meaning "other", is for files I could not find in any of the three models.
+
+ADC: atmos_param/hs_forcing/hs_forcing.f90
+
+am2: atmos_param/monin_obukhov/monin_obukhov.f90
+am2: atmos_param/vert_turb_driver/vert_turb_driver.f90
+am2: atmos_param/diffusivity/diffusivity.f90
+am2: atmos_param/my25_turb/my25_turb.f90
+am2: atmos_param/shallow_conv/shallow_conv.f90
+am2: atmos_param/vert_diff/vert_diff.f90
+
+Oth: atmos_param/dry_convection/dry_convection.f90
+am2: atmos_param/lscale_cond/lscale_cond.f90
+Oth: atmos_param/dargan_bettsmiller/dargan_bettsmiller.f90
+am2: shared/tridiagonal/tridiagonal.f90
+Oth: shared/simple_sat_vapor_pres/simple_sat_vapor_pres.f90
+am2: coupler/surface_flux.f90
+
+Oth: coupler/mixed_layer.f90
+Oth: atmos_param/tapio_forcing/grid_physics_simple.f90
+Oth: atmos_param/two_stream/radiation.f90
+
+ADC: atmos_shared/vert_advection/vert_advection.f90
+ADC: atmos_solo/atmos_model.f90
+ADC: atmos_spectral/driver/solo/atmosphere.f90
+ADC: atmos_spectral/init/spectral_init_cond.f90
+ADC: atmos_spectral/init/spectral_initialize_fields.f90
+ADC: atmos_spectral/init/topog_regularization.f90
+ADC: atmos_spectral/init/vert_coordinate.f90
+ADC: atmos_spectral/model/fv_advection.f90
+ADC: atmos_spectral/model/global_integral.f90
+ADC: atmos_spectral/model/implicit.f90
+ADC: atmos_spectral/model/leapfrog.f90
+ADC: atmos_spectral/model/matrix_invert.f90
+ADC: atmos_spectral/model/press_and_geopot.f90
+ADC: atmos_spectral/model/spectral_damping.f90
+ADC: atmos_spectral/model/spectral_dynamics.f90
+ADC: atmos_spectral/model/tracer_type.f90
+ADC: atmos_spectral/model/water_borrowing.f90
+ADC: atmos_spectral/tools/gauss_and_legendre.f90
+ADC: atmos_spectral/tools/grid_fourier.f90
+ADC: atmos_spectral/tools/spec_mpp.f90
+ADC: atmos_spectral/tools/spherical.f90
+ADC: atmos_spectral/tools/spherical_fourier.f90
+ADC: atmos_spectral/tools/transforms.f90
+ADC: shared/constants/constants.f90
+ADC: shared/diag_manager/diag_axis.f90
+ADC: shared/diag_manager/diag_manager.f90
+ADC: shared/diag_manager/diag_output.f90
+ADC: shared/fft/fft99.f90
+ADC: shared/fft/fft.F90
+ADC: shared/field_manager/field_manager.F90
+ADC: shared/field_manager/parse.inc
+ADC: shared/fms/fms.f90
+ADC: shared/fms/fms_io.F90
+ADC: shared/fms/read_data_2d.inc
+ADC: shared/fms/read_data_3d.inc
+ADC: shared/fms/read_data_4d.inc
+ADC: shared/fms/write_data.inc
+ADC: shared/horiz_interp/horiz_interp.f90
+ADC: shared/memutils/memuse.c
+ADC: shared/memutils/memutils.F90
+ADC: shared/mpp/mpp_chksum.h
+ADC: shared/mpp/mpp_chksum_int.h
+ADC: shared/mpp/mpp_domains.F90
+ADC: shared/mpp/mpp.F90
+ADC: shared/mpp/mpp_global_field.h
+ADC: shared/mpp/mpp_global_reduce.h
+ADC: shared/mpp/mpp_global_sum.h
+ADC: shared/mpp/mpp_io.F90
+ADC: shared/mpp/mpp_read_2Ddecomp.h
+ADC: shared/mpp/mpp_reduce.h
+ADC: shared/mpp/mpp_sum.h
+ADC: shared/mpp/mpp_transmit.h
+ADC: shared/mpp/mpp_update_domains2D.h
+ADC: shared/mpp/mpp_write_2Ddecomp.h
+ADC: shared/mpp/mpp_write.h
+ADC: shared/mpp/nsclock.c
+ADC: shared/mpp/os.h
+ADC: shared/platform/platform.F90
+ADC: shared/time_manager/time_manager.f90
+ADC: shared/topography/gaussian_topog.f90
+ADC: shared/topography/topography.f90
+ADC: shared/tracer_manager/tracer_manager.F90

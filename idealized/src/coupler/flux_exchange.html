@@ -1,0 +1,815 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <title>module flux_exchange</title>
+   <link rel="stylesheet" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" 
+                          type="text/css">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+</head>
+<body>
+<font size=1 class="header">
+<a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+<a href="#PUBLIC DATA">PUBLIC DATA </a>~
+<a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+<a href="#NAMELIST">NAMELIST </a>~
+<a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS</a>~
+<a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+<a href="#REFERENCES">REFERENCES</a>~
+<a href="#NOTES">NOTES </a>
+</font><hr>
+
+
+<h2>module flux_exchange</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+     <b>Contact:</b> &nbsp;  Bruce Wyman <br>
+     <b>Reviewers:</b>&nbsp; <br>
+     <b>Change History:&nbsp; </b><a HREF="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/coupler/flux_exchange.f90">WebCVS Log</a> <br>
+     <b>Last Modified:</b>&nbsp; $Date: 2002/02/22 19:13:00 $
+</div><br>
+<!-- END HEADER -->
+<!-------------------------------------------------------------------->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<div>
+<p>The flux_exchange module provides interfaces to couple the following
+component models: atmosphere, ocean, land, and ice. All interpolation
+between physically distinct model grids is handled by the exchange
+grid (xgrid_mod) with the interpolated quantities being conserved.</p>
+</div>
+<!-- END OVERVIEW -->
+<!-------------------------------------------------------------------->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>
+<ol>
+  <li> This version of flux_exchange_mod allows the definition of
+      physically independent grids for atmosphere, land and sea
+      ice. Ice and ocean must share the same physical grid (though the
+      domain decomposition on parallel systems may be different). Grid
+      information is input through the grid_spec file (URL). The
+      masked region of the land grid and ice/ocean grid must "tile"
+      each other.  The masked region of the ice grid and ocean
+      grid must be identical.
+  <pre>
+   ATMOSPHERE  |----|----|----|----|----|----|----|----|
+
+         LAND  |---|---|---|---|xxx|xxx|xxx|xxx|xxx|xxx|
+
+          ICE  |xxx|xxx|xxx|xxx|---|---|---|---|---|---|
+
+         OCEAN |xxx|xxx|xxx|xxx|---|---|---|---|---|---|
+
+        where  |xxx| = masked grid point
+   </pre>
+      <p>The atmosphere, land, and ice grids exchange information using
+      the exchange grid xmap_sfc.</p>
+
+      <p>The land and ice grids exchange runoff data using the exchange
+      grid xmap_runoff.</p>
+
+      <p>Transfer of data between the ice bottom and ocean does not
+      require an exchange grid as the grids are physically
+      identical. The flux routines will automatically detect and
+      redistribute data if their domain decompositions are different.</p>
+
+      <p>To get information from the atmosphere to the ocean it must pass
+      through the ice model, first by interpolating from the
+      atmospheric grid to the ice grid, and then transferring from the
+      ice grid to the ocean grid.</p>
+ </li>
+ <li> Each component model must have a public defined data type
+      containing specific boundary fields.  A list of these quantities
+      is located in the <A
+      HREF="#NOTES">NOTES</A> of this document.
+ <br><br>
+ </li>
+ <li>  The surface flux of sensible heat and surface evaporation can be
+      implicit functions of surface temperature.  As a consequence, the
+      parts of the land and sea-ice models that update the surface
+      temperature must be called on the atmospheric time step
+ <br><br>
+ </li>
+ <li> The surface fluxes of all other tracers and of momentum are
+      assumed to be explicit functions of all surface parameters
+ <br><br>
+ </li>
+ <li>  While no explicit reference in made within this module to the
+      implicit treatment of vertical diffusion in the atmosphere and
+      in the land or sea-ice models, the module is designed to allow
+      for simultaneous implicit time integration on both sides of the
+      surface interface.
+ <br><br>
+ </li>
+ <li>  Due to #5, the diffusion part of the land and ice models must be
+      called on the atmospheric time step.
+ <br><br>
+ </li>
+</ol>
+</div>
+<!-- END DESCRIPTION -->
+<!-------------------------------------------------------------------->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>
+   atmos_model_mod
+     ice_model_mod
+   ocean_model_mod
+    land_model_mod
+  surface_flux_mod
+ monin_obukhov_mod
+         xgrid_mod
+  diag_manager_mod
+  time_manager_mod
+sat_vapor_pres_mod
+ diag_integral_mod
+     utilities_mod
+     constants_mod
+           mpp_mod
+   mpp_domains_mod
+</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-------------------------------------------------------------------->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<!-- BEGIN PUBLIC INTERFACE -->
+<PRE>
+    <b>use flux_exchange_mod</b> [, only: flux_exchange_init,   &#38;
+                                   sfc_boundary_layer,   &#38;
+                                   generate_sfc_xgrid,   &#38;
+                                   flux_down_from_atmos, &#38;
+                                   flux_up_to_atmos,     &#38;
+                                   flux_land_to_ice,     &#38;
+                                   flux_ice_to_ocean,    &#38;
+                                   flux_ocean_to_ice ]
+
+</pre>
+<div><dl>
+ <dt>  <a href="#flux_exchange_init">flux_exchange_init:</a>
+ <dd>   Initializes the interpolation routines and diagnostics.
+
+ <dt>  <a href="#generate_sfc_xgrid">generate_sfc_xgrid:</a>
+ <dd>   Optimizes the exchange grids by eliminating land and ice
+        partitions with no data.
+
+ <dt>  <a href="#sfc_boundary_layer">sfc_boundary_layer:</a>
+ <dd>   Computes explicit fluxes as well as derivatives that will be used
+        to compute an implicit flux correction.
+
+ <dt>  <a href="#flux_down_from_atmos">flux_down_from_atmos:</a>
+ <dd>   Returns fluxes and derivatives corrected for the implicit
+        treatment of atmospheric diffusive fluxes, as well as the
+        increments in the temperature and specific humidity of the
+        lowest atmospheric layer due to all explicit processes as well
+        as the diffusive fluxes through the top of this layer.
+
+ <dt>  <a href="#flux_up_to_atmos">flux_up_to_atmos:</a>
+ <dd>   Corrects the fluxes for consistency with the new surface
+        temperatures in land and ice models.  Final increments for
+        temperature and specific humidity in the lowest atmospheric
+        layer are computed and returned to the atmospheric model so
+        that it can finalize the increments in the rest of the
+        atmosphere.
+
+ <dt>  <a href="#flux_ice_to_ocean">flux_ice_to_ocean:</a>
+ <dd>   Takes the ice model state (fluxes at the bottom of the ice) and
+        interpolates it to the ocean model grid.
+
+ <dt>  <a href="#flux_ocean_to_ice">flux_ocean_to_ice:</a>
+ <dd>   Takes the ocean model state and interpolates it onto the bottom
+        of the ice.
+
+ <dt>  <a href="#flux_land_to_ice">flux_land_to_ice:</a>
+ <dd>   Cnservative transfer of water and snow discharge from the land
+        model to sea ice/ocean model.
+</dl>
+</div><br>
+<!-- END INTERFACE -->
+<!-------------------------------------------------------------------->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN DATA_TYPES -->
+<div>
+     None.
+</div><br>
+<!-- END DATA_TYPES -->
+<!-------------------------------------------------------------------->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<div>
+<b>Note:</b>
+
+  <p>All arguments below are assumed to be real unless otherwise stated.
+  The following suffixes for variable names will designate which
+  component model grid the field is on.</p>
+<pre>
+          _atm     atmospheric model, dimension(:,:)
+          _ocean   ocean model,       dimension(:,:)
+          _land    land model,        dimension(:,:,:)
+          _ice     ice model,         dimension(:,:,:)
+</pre>
+<p>The first two dimensions are assumed to be longitude and latitude.
+  The third dimension (for the land and ice models) is for partitions
+  (e.g., different land or ice types).</p>
+
+<p>For details on the defined types (atmos_boundary_data_type, land_boundary_data_type,
+  ice_boundary_data_type, ocean_boundary_data_type) see the documentation for the
+  individual component models or look at the <A HREF="#NOTES">developer notes</A> below.</p>
+</div>
+<ol type = "a">
+<li><a name="flux_exchange_init"></a><h4>flux_exchange_init</h4>
+<pre>
+  subroutine flux_exchange_init ( Time, Atm, Land, Ice, Ocean, &#38;
+       atmos_land_boundary, atmos_ice_boundary, land_ice_atmos_boundary, &#38;
+       land_ice_boundary, ice_ocean_boundary, ocean_ice_boundary )
+
+    type                (time_type), intent(in)  :: Time
+    type (atmos_boundary_data_type), intent(in)  :: Atm
+    type  (land_boundary_data_type), intent(in)  :: Land
+    type   (ice_data_type), intent(in)  :: Ice
+    type (ocean_data_type), intent(in)  :: Ocean
+    type(atmos_land_boundary_type), intent(out) :: atmos_land_boundary
+    type(atmos_ice_boundary_type), intent(out) :: atmos_ice_boundary
+    type(land_ice_atmos_boundary_type), intent(out) :: land_ice_atmos_boundary
+    type(land_ice_boundary_type), intent(out) :: land_ice_boundary
+    type(ice_ocean_boundary_type), intent(out) :: ice_ocean_boundary
+    type(ocean_ice_boundary_type), intent(out) :: ocean_ice_boundary
+
+</pre>
+</li>
+
+<li><a name="sfc_boundary_layer"></a><h4>sfc_boundary_layer</h4>
+<pre>
+  subroutine sfc_boundary_layer ( dt, Time, Atm, Land, Ice, Boundary )
+
+    real,                   intent(in)  :: dt
+    type       (time_type), intent(in)  :: Time
+    type (atmos_boundary_data_type), intent(in)  :: Atm
+    type  (land_boundary_data_type), intent(in)  :: Land
+    type   (ice_data_type), intent(in)  :: Ice
+    type(land_ice_atmos_boundary_type), intent(out) :: Boundary
+</pre>
+ <p> The following quantities in the land_ice_atmos_boundary_type are
+    computed:</p>
+<pre> 
+     t_surf_atm = surface temperature (used for radiation)    (K)
+     albedo_atm = surface albedo      (used for radiation)    (nondimensional)
+  rough_mom_atm = surface roughness for momentum (m)
+  land_frac_atm = fractional area of land beneath an atmospheric
+                  grid box 
+     dtaudv_atm = derivative of wind stress w.r.t. the
+                  lowest level wind speed  (Pa/(m/s))
+     flux_u_atm = zonal wind stress  (Pa)
+     flux_v_atm = meridional wind stress (Pa)
+     u_star_atm = friction velocity (m/s)
+     b_star_atm = buoyancy scale    (m2/s)
+
+     (u_star and b_star are defined so that u_star**2 = magnitude
+       of surface stress divided by density of air at the surface, 
+       and u_star*b_star = buoyancy flux at the surface)
+</pre>
+</li>
+<li><a name="flux_down_from_atmos"></a><h4>flux_down_from_atmos</h4>
+<pre>
+  subroutine flux_down_from_atmos (Time, Atm, Land, Ice, Atmos_boundary, 
+                                   Land_boundary, Ice_boundary )
+
+    type       (time_type), intent(in)  :: Time
+    type (atmos_boundary_data_type), intent(in)  :: Atm
+    type  (land_boundary_data_type), intent(in)  :: Land
+    type   (ice_data_type), intent(in)  :: Ice
+    type(land_ice_atmos_boundary_type), intent(in) :: Atmos_boundary
+    type(atmos_land_boundary_type), intent(out) :: Land_boundary
+    type(atmos_ice_boundary_type),  intent(out) :: Ice_boundary
+
+</pre>
+<p>The following elements from Atmos_boundary are used as input:
+<pre>
+    flux_u_atm = zonal wind stress (Pa)  
+    flux_v_atm = meridional wind stress (Pa)
+</pre>
+<p>The following elements of Land_boundary are output:
+<pre>
+   flux_t_land = sensible heat flux (W/m2)
+   flux_q_land = specific humidity flux (Kg/(m2 s)
+  flux_lw_land = net longwave flux (W/m2), uncorrected for
+                 changes in surface temperature
+  flux_sw_land = net shortwave flux (W/m2)
+     dhdt_land = derivative of sensible heat flux w.r.t.
+                 surface temperature (on land model grid)  (W/(m2 K)
+     dedt_land = derivative of specific humidity flux w.r.t.
+                 surface temperature (on land model grid)  (Kg/(m2 s K)
+     drdt_land = derivative of upward longwave flux w.r.t.
+                 surface temperature (on land model grid) (W/(m2 K)
+    lprec_land = liquid precipitation, mass for one time step
+                  (Kg/m2)
+    fprec_land = frozen precipitation, mass for one time step
+                  (Kg/m2)
+</pre>
+<p>The following elements of Ice_boundary are output:
+<pre>
+    flux_u_ice = zonal wind stress (Pa)
+    flux_v_ice = meridional wind stress (Pa)
+    coszen_ice = cosine of the zenith angle
+</pre>
+</li>
+<li><a name="flux_land_to_ice"</a><h4>flux_land_to_ice</h4>
+<pre>
+  subroutine flux_land_to_ice(Land, Ice, Boundary )
+    type (land_boundary_data_type), intent(in) :: Land
+    type ( ice_data_type), intent(in) :: Ice
+    type(land_ice_boundary_type), intent(out) :: Boundary
+</pre>
+<p>The following elements are transferred from the Land to the
+    Land_ice_boundary: 
+<pre>
+    discharge --> runoff (kg/m2)
+    discharge_snow --> calving (kg/m2)
+</pre>
+</li>
+<li><a name="flux_ice_to_ocean"</a><h4>flux_ice_to_ocean</h4>
+<pre>
+  subroutine flux_ice_to_ocean ( Ice, Ocean, Boundary )
+
+    type (ice_data_type),   intent(in)  :: Ice
+    type (ocean_data_type), intent(in)  :: Ocean
+    type(ice_ocean_boundary_type), intent(inout) :: Boundary
+</pre>
+
+<p>The following quantities are transferred from the Ice to the
+   ice_ocean_boundary_type:
+<pre>
+   flux_u = zonal wind stress (Pa)
+   flux_v = meridional wind stress (Pa)
+   flux_t = sensible heat flux (W/m2)
+   flux_q = specific humidity flux (Kg/m2/s)
+flux_salt = salt flux (Kg/m2/s)
+  flux_sw = net (down-up) shortwave flux (W/m2)
+  flux_lw = net (down-up) longwave flux (W/m2)
+    lprec = mass of liquid precipitation since last
+                  time step (Kg/m2)
+    fprec = mass of frozen precipitation since last
+            time step (Kg/m2)
+   runoff = mass (?) of runoff since last time step
+                   (Kg/m2)
+   p_surf = surface pressure (Pa)
+</pre>
+</li>
+
+<li><a name="flux_ocean_to_ice"</a><h4>flux_ocean_to_ice</h4>
+<pre>
+  subroutine flux_ocean_to_ice ( Ocean, Ice, Boundary )
+
+    type (ocean_data_type), intent(in)  :: Ocean
+    type (ice_data_type),   intent(in)  :: Ice
+    type(ocean_ice_boundary_type), intent(inout) :: Boundary
+</pre>
+<p>The following quantities are transferred from the Ocean to the
+    ocean_ice_boundary_type: 
+<pre>
+    t_surf = surface temperature (deg K)
+    frazil = frazil (???)
+    u_surf = zonal ocean current/ice motion (m/s)
+    v_surf = meridional ocean current/ice motion (m/s)
+</pre>
+</li>
+
+<li><a name="generate_sfc_xgrid"</a><h4>generate_sfc_xgrid</h4>
+<pre>
+  subroutine generate_sfc_xgrid( Land, Ice )
+    type(land_boundary_data_type), intent(in) :: Land
+    type(ice_data_type), intent(in)           :: Ice
+</pre>
+</li>
+<li><a name="flux_up_to_atmos"</a><h4>flux_up_to_atmos</h4>
+<pre>
+  subroutine flux_up_to_atmos ( Time, Land, Ice, Boundary )
+
+    type       (time_type), intent(in)  :: Time
+    type  (land_boundary_data_type), intent(in)  :: Land
+    type   (ice_data_type), intent(in)  :: Ice
+    type(land_ice_atmos_boundary_type), intent(out) :: Boundary
+
+ in:       Time   = current time [time_type]
+           Land   =            [land_boundary_data_type]
+           Ice    =             [ice_boundary_data_type]
+
+ The following elements of the land_ice_atmos_boundary_type are computed:
+    dt_t  = temperature change at the lowest
+             atmospheric level (deg k)
+    dt_q  = specific humidity change at the lowest
+             atmospheric level (kg/kg)
+</pre>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<!-------------------------------------------------------------------->
+<a name="NAMELIST"></a>
+<hr>
+<h4>NAMELIST</h4>
+<!-- BEGIN NAMELIST -->
+<div>
+<b>&#38;flux_exchange_nml</b>
+<br><br>
+<dl>
+  <dt><tt>z_ref_heat</tt></dt>  
+  <dd>reference height (meters) for temperature and relative humidity diagnostics
+              (t_ref,rh_ref,del_h,del_q)<br><span class="type"> <font size=2>
+              [real, default: z_ref_heat = 2.]</font></span></dd>
+
+  <dt><tt>z_ref_mom</tt></dt>   
+  <dd>reference height (meters) for momentum diagnostics
+              (u_ref,v_ref,del_m)<br><span class="type"> <font size=2>
+              [real, default: z_ref_mom = 10.</font></span></dd>]
+</dl>
+</div><br>
+<!-- END NAMELIST -->
+<!-------------------------------------------------------------------->
+<a name="DIAGNOSTIC FIELDS"></a>
+<hr>
+<h4>DIAGNOSTIC FIELDS</h4>
+<!-- BEGIN DIAGNOSTICS -->
+<div>
+Diagnostic fields may be output to a netcdf file by specifying the
+module name identifier <b>flux</b> and the desired field names (given below)
+in file <b>diag_table</b>. See the documentation for diag_manager.
+<PRE>
+
+Diagnostic fields for module name identifier: <b>flux</b>
+
+   field name      field description (units)
+   ----------      -------------------------
+
+   land_mask       fractional amount of land (none)     <-- STATIC
+   glac_mask       fractional amount of glacier (none)  <-- STATIC
+   ice_mask        fractional amount of sea ice (none)
+   wind            wind speed for flux calculations (m/s)
+   drag_moist      drag coeff for moisture (none)
+   drag_heat       drag coeff for heat (none)
+   drag_mom        drag coeff for momentum (none)
+   rough_moist     surface roughness for moisture (m)
+   rough_heat      surface roughness for heat (m)
+   rough_mom       surface roughness for momentum (m)
+   u_star          friction velocity (m/s)
+   b_star          buoyancy scale (m/s2)
+   tau_x           zonal wind stress (pa)
+   tau_y           meridional wind stress (pa)
+   t_surf          surface temperature (deg_k)
+   shflx           sensible heat flux (w/m2)
+   evap            evaporation rate (kg/m2/s)
+   lwflx           net (down-up) longwave flux (w/m2)
+   t_atm           temperature at btm level (deg_k)
+   u_atm           u wind component at btm level (m/s)
+   v_atm           v wind component at btm level (m/s)
+   rh_ref          relative humidity at ref height (deg_k)
+   t_ref           temperature at ref height (deg_k)
+   u_ref           u wind component at ref height (m/s)
+   v_ref           v wind component at ref height (m/s)
+   del_q           ref height interp factor for specific humidity (none)
+   del_h           ref height interp factor for heat (none)
+   del_m           ref height interp factor for momentum (none)
+</pre>
+
+ <b> Notes:</b>
+<br><br>
+<ol>
+    <li> del_q, del_h, or del_m cannot be output unless rh_ref, t_ref, u_ref, or v_ref
+       have been specified.
+    </li>
+    <li> All fields are output on the two-dimensional (x-y) atmospheric grid.
+    </li>
+</ol>
+</div><br>
+<!-- END DIAGNOSTICS -->
+<!-------------------------------------------------------------------->
+<a name="DATA SETS"></a>
+<hr>
+<h4>DATA SETS</h4>
+<!-- BEGIN DATA_SETS -->
+<div>
+     The grid_spec.nc file is read by flux_exchange_init to set up the
+     xmap_sfc and xmap_runoff exchange grids.
+
+</div><br>
+<!-- END DATA_SETS -->
+<!-------------------------------------------------------------------->
+<a name="ERROR MESSAGES"></a>
+<hr>
+<h4>ERROR MESSAGES</h4>
+<!-- BEGIN ERROR MESSAGES -->
+<div>
+<dl>
+<dt><b>FATAL ERROR in flux_exchange</b></dt>
+    <dd><span class="errmsg">must call flux_exchange_init first</span></dd>
+    <dd>flux_exchange_init has not been called before calling
+         sfc_boundary_layer.<br><br></dd>
+<dt><b>FATAL ERROR in switch_surf_diff_type_order in vert_diff_mod</b></dt>
+    <dd><span class="errmsg">arguments have the wrong order</span></dd>
+    <dd>This error should not occur unless the user has modified
+         the code. Check with the developer if necessary.</dd>
+</dl>
+</div><br>
+<!-- END ERROR MESSAGES -->
+<!-------------------------------------------------------------------->
+<a name="REFERENCES"></a>
+<hr>
+<h4>REFERENCES</h4>
+<!-- BEGIN REFERENCES -->
+<div>
+None.
+</div><br>
+<!-- END REFERENCES -->
+<!-------------------------------------------------------------------->
+<a name="COMPILER SPECIFICS"></a>
+<hr>
+<h4>COMPILER SPECIFICS</h4>
+<div>
+None.
+</div><br>
+<!-- END COMPILER -->
+<!-------------------------------------------------------------------->
+<a name="PRECOMPILER OPTIONS"></a>
+<hr>
+<h4>PRECOMPILER OPTIONS (or PORTABILITY)</h4>
+<!-- BEGIN PRECOMPILER -->
+<div>
+None.
+</div><br>
+<!-- END PRECOMPILER -->
+<!-------------------------------------------------------------------->
+<a name="LOADER OPTIONS"></a>
+<hr>
+<h4>LOADER OPTIONS (or ACQUIRING SOURCE)</h4>
+<!-- BEGIN LOADER -->
+<div>
+None.
+</div><br>
+<!-- END LOADER -->
+<!-------------------------------------------------------------------->
+<a name="KNOWN BUGS"></a>
+<hr>
+<h4>KNOWN BUGS</h4>
+<!-- BEGIN KNOWN BUGS -->
+<div>
+None.
+</div><br>
+<!-- END KNOWN BUGS -->
+<!-------------------------------------------------------------------->
+<a name="NOTES"></a>
+<hr>
+<h4>NOTES</h4>
+<!-- BEGIN NOTES -->
+<PRE>
+
+MAIN PROGRAM EXAMPLE
+--------------------
+
+     DO slow time steps (ocean)
+
+          <b>call flux_ocean_to_ice</b>
+
+          call ICE_SLOW_UP
+
+
+          DO fast time steps (atmos)
+
+               <b>call sfc_boundary_layer</b>
+
+               call ATMOS_DOWN
+
+               <b>call flux_down_from_atmos</b>
+
+               call LAND_FAST
+
+               call ICE_FAST
+
+               <b>call flux_up_to_atmos</b>
+
+               call ATMOS_UP
+
+          END DO
+
+          call ICE_SLOW_DN
+
+          <b>call flux_ice_to_ocean</b>
+
+          call OCEAN
+
+     END DO
+
+  LAND_FAST and ICE_FAST must update the surface temperature
+
+=======================================================================
+
+REQUIRED VARIABLES IN DEFINED DATA TYPES FOR COMPONENT MODELS
+--------------------------------------------------------------
+
+<B>type (atmos_boundary_data_type) :: Atm</B>
+<B>type (surf_diff_type) :: Atm%Surf_Diff</B>
+
+real, dimension(:)
+
+   Atm%lon_bnd   longitude axis grid box boundaries in radians
+                 must be monotonic
+   Atm%lat_bnd   latitude axis grid box boundaries in radians
+                 must be monotonic
+
+real, dimension(:,:)
+
+   Atm%t_bot     temperature at lowest model level
+   Atm%q_bot     specific humidity at lowest model level
+   Atm%z_bot     height above the surface for the lowest model level (m)
+   Atm%p_bot     pressure at lowest model level (pa)
+   Atm%u_bot     zonal wind component at lowest model level (m/s)
+   Atm%v_bot     meridional wind component at lowest model level (m/s)
+   Atm%p_surf    surface pressure (pa)
+   Atm%gust      gustiness factor (m/s)
+   Atm%flux_sw   net shortwave flux at the surface
+   Atm%flux_lw   downward longwave flux at the surface
+   Atm%lprec     liquid precipitation (kg/m2)
+   Atm%fprec     water equivalent frozen precipitation (kg/m2)
+   Atm%coszen    cosine of the zenith angle
+
+  (the following five fields are gathered into a data type for convenience in passing
+  this information thorugh the different levels of the atmospheric model --
+  these fields are rlated to the simultaneous implicit time steps in the
+  atmosphere and surface models -- they are described more fully in
+  <A HREF="flux_exchange.tech.ps">flux_exchange.tech.ps</A> and
+  in the documntation for vert_diff_mod
+
+
+   Atm%Surf_Diff%dtmass   = dt/mass where dt = atmospheric time step ((i+1) = (i-1) for leapfrog) (s)
+                          mass = mass per unit area of lowest atmosphehic layer  (Kg/m2))
+   Atm%Surf_Diff%delta_t  increment ((i+1) = (i-1) for leapfrog) in temperature of
+                          lowest atmospheric layer  (K)
+   Atm%Surf_Diff%delta_q  increment ((i+1) = (i-1) for leapfrog) in specific humidity of
+                          lowest atmospheric layer (nondimensional -- Kg/Kg)
+   Atm%Surf_Diff%dflux_t  derivative of implicit part of downward temperature flux at top of lowest
+                          atmospheric layer with respect to temperature
+                          of lowest atmospheric layer (Kg/(m2 s))
+   Atm%Surf_Diff%dflux_q  derivative of implicit part of downward moisture flux at top of lowest
+                          atmospheric layer with respect to specific humidity of
+                          of lowest atmospheric layer (Kg/(m2 s))
+
+
+integer, dimension(4)
+
+   Atm%axes      Axis identifiers returned by diag_axis_init for the
+                 atmospheric model axes: X, Y, Z_full, Z_half.
+
+-----------------------------------------------
+
+<B>type (land_boundary_data_type) :: Land</B>
+
+real, dimension(:)
+
+   Land%lon_bnd     longitude axis grid box boundaries in radians
+                    must be monotonic
+   Land%lat_bnd     latitude axis grid box boundaries in radians
+                    must be monotonic
+
+logical, dimension(:,:,:)
+
+   Land%mask        land/sea mask (true for land)
+   Land%glacier     glacier mask  (true for glacier)
+
+real, dimension(:,:,:)
+
+   Land%tile_size   fractional area of each tile (partition)
+
+   Land%t_surf      surface temperature (deg k)
+   Land%albedo      surface albedo (fraction)
+   Land%rough_mom   surface roughness for momentum (m)
+   Land%rough_heat  surface roughness for heat/moisture (m)
+   Land%stomatal    stomatal resistance
+   Land%snow        snow depth (water equivalent) (kg/m2)
+   Land%water       water depth of the uppermost bucket (kg/m2)
+   Land%max_water   maximum water depth allowed in the uppermost bucket (kg/m2)
+
+-----------------------------------------------
+
+
+<B>type (ice_boundary_data_type) :: Ice</B>
+
+real, dimension(:)
+
+   Ice%lon_bnd       longitude axis grid box boundaries for temperature points
+                     in radians (must be monotonic)
+   Ice%lat_bnd       latitude axis grid box boundaries for temperature points
+                     in radians (must be monotonic)
+   Ice%lon_bnd_uv    longitude axis grid box boundaries for momentum points
+                     in radians (must be monotonic)
+   Ice%lat_bnd_uv    latitude axis grid box boundaries for momentum points
+                     in radians (must be monotonic)
+
+logical, dimension(:,:,:)
+
+   Ice%mask          ocean/land mask for temperature points
+                       (true for ocean, with or without ice)
+   Ice%mask_uv       ocean/land mask for momentum points
+                       (true for ocean, with or without ice)
+   Ice%ice_mask      optional ice mask (true for ice)
+
+real, dimension(:,:,:)
+
+   Ice%part_size     fractional area of each partition of a temperature grid box
+   Ice%part_size_uv  fractional area of each partition of a momentum grid box
+
+   <I>the following fields are located on the ice top grid</I>
+
+   Ice%t_surf        surface temperature (deg k)
+   Ice%albedo        surface albedo (fraction)
+   Ice%rough_mom     surface roughness for momentum (m)
+   Ice%rough_heat    surface roughness for heat/moisture (m)
+   Ice%u_surf        zonal (ocean/ice) current at the surface (m/s)
+   Ice%v_surf        meridional (ocean/ice) current at the surface (m/s)
+
+   <I>the following fields are located on the ice bottom grid</I>
+
+   Ice%flux_u        zonal wind stress (Pa)
+   Ice%flux_v        meridional wind stress (Pa)
+   Ice%flux_t        sensible heat flux (w/m2)
+   Ice%flux_q        specific humidity flux (kg/m2/s)
+   Ice%flux_sw       net (down-up) shortwave flux (w/m2)
+   Ice%flux_lw       net (down-up) longwave flux (w/m2)
+   Ice%lprec         mass of liquid precipitation since last time step (Kg/m2)
+   Ice%fprec         mass of frozen precipitation since last time step (Kg/m2)
+   Ice%runoff        mass of runoff water since last time step (Kg/m2)
+
+-----------------------------------------------
+
+<B>type (ocean_boundary_data_type) :: Ocean</B>
+
+real, dimension(:)
+
+   Ocean%Data%lon_bnd      longitude axis grid box boundaries for temperature
+                           points on the ocean DATA GRID (radians)
+   Ocean%Data%lat_bnd      latitude axis grid box boundaries for temperature
+                           points on the ocean DATA GRID (radians)
+   Ocean%Data%lon_bnd_uv   longitude axis grid box boundaries for momentum
+                           points on the ocean DATA GRID (radians)
+   Ocean%Data%lat_bnd_uv   latitude axis grid box boundaries for momentum
+                           points on the ocean DATA GRID (radians)
+
+   Ocean%Ocean%lon_bnd     longitude axis grid box boundaries for temperature
+                           points on the ocean MODEL GRID (radians)
+   Ocean%Ocean%lat_bnd     latitude axis grid box boundaries for temperature
+                           points on the ocean MODEL GRID (radians)
+   Ocean%Ocean%lon_bnd_uv  longitude axis grid box boundaries for momentum
+                           points on the ocean MODEL GRID (radians)
+   Ocean%Ocean%lat_bnd_uv  latitude axis grid box boundaries for momentum
+                           points on the ocean MODEL GRID (radians)
+
+     Note: The data values in all longitude and latitude grid box boundary
+           array must be monotonic.
+
+logical, dimension(:,:)
+
+   Ocean%Data%mask       ocean/land mask for temperature points on the ocean
+                         DATA GRID (true for ocean)
+   Ocean%Data%mask_uv    ocean/land mask for momentum points on the ocean
+                         DATA GRID (true for ocean)
+
+   Ocean%Ocean%mask      ocean/land mask for temperature points on the ocean
+                         MODEL GRID (true for ocean)
+   Ocean%Ocean%mask_uv   ocean/land mask for momentum points on the ocean
+                         MODEL GRID (true for ocean)
+
+real, dimension(:,:)
+
+   Ocean%t_surf_data  surface temperature on the ocean DATA GRID (deg k)
+
+   Ocean%t_surf       surface temperature on the ocean MODEL GRID (deg k)
+   Ocean%u_surf       zonal ocean current at the surface on the ocean
+                      MODEL GRID (m/s)
+   Ocean%v_surf       meridional ocean current at the surface on the
+                      ocean MODEL GRID (m/s)
+   Ocean%frazil       frazil at temperature points on the ocean MODEL GRID
+
+</PRE>
+<!-- END NOTES -->
+<!-------------------------------------------------------------------->
+<a name="FUTURE PLANS"></a>
+<hr>
+<h4>FUTURE PLANS</h4>
+<!-- BEGIN FUTURE PLANS -->
+<div>
+Run-time configuration of exchange quantities.
+</div><br>
+<!-- END FUTURE PLANS -->
+<!-------------------------------------------------------------------->
+<hr>
+</body>
+</html>

@@ -1,0 +1,18 @@
+  Notes about the RAW filter
+  --------------------------
+
+  The RAW filter was implemented by Zhihong Tan in February 2012. 
+  The source files that were modified are leapfrog.f90, spectral_dynamics.f90
+  and atmosphere.f90 (located in ../driver/solo). The modifications
+  are documented in each file.
+  
+  The RAW filter introduces an additional positive filter parameter smaller 
+  than 1 (a value of 1 corresponds to the RA filter previously used). It has been 
+  set at 0.53 and can be modified in spectral_dynamics.nml declared in the 
+  namelist file in ~/fms/exp/${exp_name}/input. The RAW filter is described 
+  and tested in "Williams, P. D., 2011: Mon. Wea. Rev., 137, 1996-2007" and tested
+  in a GCM similar to ours in "Amezuca J. et al. Mon. Wea. Rev., 139, 
+  608-619".
+ 
+  Farid Ait Chaalal, March 2012
+

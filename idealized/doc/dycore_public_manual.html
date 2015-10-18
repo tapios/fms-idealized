@@ -1,0 +1,3201 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>
+     The FMS Jakarta Atmospheric Dynamical Core User Guide
+  </title>
+</head>
+<body background="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/gray_texture_1.gif" align="left" alink="#FF0000" vlink="#551A8B" link="#0000EE" bgcolor="#FFFFFF" text="#000000">
+<a name="top"></a>
+<table cellpadding="10" border="2" align="right">
+<tr>
+<td><big><b><i>Page Contents</i></b></big>
+<hr width="100%">
+<a href="quickstart.html" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">Quickstart guide: </a>
+<br>
+    
+    &nbsp;&nbsp;
+      <a href="quickstart.html" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "><font color="#660000">Atmospheric dynamical core</font></a>
+<br>
+  
+<a href="#introduction" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">1.&nbsp;Introduction</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#what%20is%20a%20dynamical%20core" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.1&nbsp;What is an atmospheric dynamical core</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#available%20cores" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.2&nbsp;The available cores</font></a>
+<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#finite%20difference" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.2.1&nbsp;Finite difference core (B-grid core)</font></a>
+<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#spectral%20core" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.2.2&nbsp;Spectral core</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#support,%20feedback%20and%20user%20contributions" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.3&nbsp;Support, feedback, user contributions</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#portability" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.4&nbsp;Portability</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#license" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">1.5&nbsp;FMS Licensing</font></a>
+<br>
+<a href="#details%20of%20the%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">2.&nbsp;Details of the code</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#documentation" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">2.1&nbsp;Where to find documentation</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#overview%20of%20finite%20difference%20core" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">2.2&nbsp;Overview of the finite difference core</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#overview%20of%20spectral%20core" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">2.3&nbsp;Overview of the spectral core</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#dynamical%20core%20interface" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">2.4&nbsp;The dynamical core interface</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#shared%20components" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">2.5&nbsp;Shared components</font></a>
+<br>
+<a href="#acquiring%20source%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">3.&nbsp;Acquiring CVS source code</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#acquire_code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">3.1&nbsp;How to acquire CVS source code</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#cvs" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">3.2&nbsp;What is CVS?</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#gforge" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">3.3&nbsp;What is GForge?</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#cvs%20details" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">3.4&nbsp;CVS details</font></a>
+<br>
+<a href="#compiling%20the%20source%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">4.&nbsp;Compiling the source code</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#mkmf" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">4.1&nbsp;The mkmf utility</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#creating%20the%20makefile" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">4.2&nbsp;Creating the makefile</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#example:%20compiling%20the%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">4.3&nbsp;Example: Compiling the code</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#compiling%20without%20mpi" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">4.4&nbsp;Compiling without MPI</font></a>
+<br>
+<a href="#preparing%20the%20runscript" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">5.&nbsp;Preparing the runscript</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#the%20runscript" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.1&nbsp;The runscript</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#the%20diagnostic%20table" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.2&nbsp;The diagnostic table</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#the%20field%20table" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.3&nbsp;The field table</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#namelist%20options" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.4&nbsp;Namelist options</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#ic_restarts" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.5&nbsp;Initial conditions and restart files</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#mppnccombine" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">5.6&nbsp;mppnccombine</font></a>
+<br>
+<a href="#examining%20output" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">6.&nbsp;Examining output</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#model%20output" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">6.1&nbsp;Model output</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#displaying%20the%20output" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">6.2&nbsp;Displaying the output</font></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#ncview" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "><font color="#660000">6.3&nbsp;ncview</font></a>
+<br>
+<a href="#performance" style="
+        text-decoration:none;color:crimson;font-style:italic
+      ">7.&nbsp;Performance</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<h1>
+     The FMS Jakarta Atmospheric Dynamical Core User Guide
+  </h1>
+<hr align="left" width="90%">
+<br>
+<a name="introduction" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">1.&nbsp;Introduction<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#what%20is%20a%20dynamical%20core" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.1&nbsp;What is an atmospheric dynamical core?</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#available%20cores" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.2&nbsp;The available cores<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#finite%20difference" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.2.1&nbsp;Finite difference core (B-grid core)</a>
+<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#spectral%20core" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.2.2&nbsp;Spectral core</a></a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#support,%20feedback%20and%20user%20contributions" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.3&nbsp;Support, feedback and user contributions</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#portability" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.4&nbsp;Portability</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#license" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">1.5&nbsp;FMS Licensing</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="what%20is%20a%20dynamical%20core" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.1&nbsp;What is an atmospheric dynamical core?</font></i>
+<br>
+<br>
+<font color="#333333">
+
+We divide a global atmospheric model into a "dynamical core" and a set of
+"physics" modules, the combination of which is sufficient to integrate the
+state of the atmosphere forward in time for a given time interval. The
+dynamical core must be able to integrate the basic fluid equations for an
+inviscid, adiabatic ideal gas over an irregular rotating surface forward in
+time. Included in the dynamical core is the horizontal and vertical advection,
+horizontal subgrid scale mixing, and the time differencing.
+<br>
+<br>
+
+Our operational definition of a global atmospheric dynamical core is a module,
+or set of modules, which is capable of integrating a particular benchmark
+calculation defined by <a href="http://www.gfdl.noaa.gov/~gth/netscape/1994/ih9401.pdf">Held and Suarez (1994)</a> so as to obtain a statistically
+steady "climate". Model physics is replaced by very simple linear relaxation of
+temperature to a specified spatial structure and the winds near the surface are
+relaxed to zero. Because the resulting flow is turbulent and cascades variance
+to small horizontal scales, either explicit or implicit horizontal mixing is
+required to obtain a solution, and, as stated above, is considered to be part
+of the dynamical core. 
+<br>
+<br>
+
+
+
+     
+</font>
+<br>
+<br>
+<a name="available%20cores" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.2&nbsp;The available cores</font></i>
+<br>
+<br>
+<font color="#333333">
+
+
+      <a name="finite%20difference" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.2.1&nbsp;Finite difference core (B-grid core)</font></i>
+<br>
+<br>
+<font color="#333333">
+
+       The global, hydrostatic finite difference dynamical core, also called
+       the B-grid core, was developed from models described in
+       <sup><a href="#1" name="returnfromfootnote1">1</a></sup> Mesinger, et al.
+       (1988) and <sup><a href="#2" name="returnfromfootnote2">2</a></sup> Wyman (1996). The
+       horizontal grid is the Arakawa B-grid and a
+       hybrid sigma/pressure vertical coordinate is used. The step-mountain
+       (eta coordinate) option is no longer supported.
+    
+      </font>
+<br>
+      
+<br>
+<br>
+
+
+      
+<a name="spectral%20core" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.2.2&nbsp;Spectral core</font></i>
+<br>
+<br>
+<font color="#333333">
+
+      The spectral dynamical core is a "plain vanilla" version of the classic
+      Eulerian spectral model, with a spherical harmonic basis, for integrating
+      the primitive equations on the sphere. The option of advecting tracers
+      with a finite-volume gridpoint scheme is also available. Barotropic
+     (2D non-divergent) and shallow water spherical models are also provided.
+   
+
+      </font>
+<br>
+      
+<br>
+<br>
+ 
+
+
+    
+</font>
+<br>
+<br>
+<a name="support,%20feedback%20and%20user%20contributions" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.3&nbsp;Support, feedback and user contributions</font></i>
+<br>
+<br>
+<font color="#333333">
+
+We will try our best to respond to your support requests and bug reports quickly, given the limits of our human resources devoted to this project. Please use the mailing lists (<tt><b>oar.gfdl.fms@majordomo.gfdl.noaa.gov</b></tt> and <tt><b>oar.gfdl.fms-atmos@majordomo.gfdl.noaa.gov</b></tt>) as the forum for support requests: browse the mailing lists for answers to your questions, and post new questions directly to the mailing list.  We would also appreciate it if you could answer other users' questions, especially those related to site and platform configuration issues that you may have encountered. We will provide very limited support for platforms not listed in the <a href="#portability">portability</a> section, and for modifications that you make to the released code.
+<br>
+<br>
+
+
+
+    
+</font>
+<br>
+<br>
+<a name="portability" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.4&nbsp;Portability</font></i>
+<br>
+<br>
+<font color="#333333">
+
+For obvious reasons, our commitment at any time is only on those
+platforms where we have adequate access for our own thorough testing.
+We will add supported platforms as we can.
+<br>
+<br>
+
+The platforms we support at present are the following:
+
+<tt><b>
+<pre>
+1) SGI
+   Chipset: MIPS
+   OS: Irix 6.5
+   Compiler: MIPSPro version 7.3.1.2 or higher
+   Libraries: Message Passing Toolkit (MPT) version 1.5.1.0 or higher.
+	      netCDF version 3.4 or higher (64-bit version)
+
+2) Linux:
+   Chipset: AMD
+   OS: GNU/Linux
+   Compiler: Intel Fortran Compiler Version 7.1-030 
+   Libraries: MPI-1 (e.g MPICH-1.2.5)
+	      netCDF version 3.4 or higher (64-bit version)
+</pre>
+</b></tt>
+
+
+        </font>
+<br>
+<br>
+<a name="license" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">1.5&nbsp;FMS Licensing</font></i>
+<br>
+<br>
+<font color="#333333">
+
+        The Flexible Modeling System (<a href="http://www.gfdl.noaa.gov/~fms">FMS</a>) is free software; you can 
+    redistribute it and/or modify it and are expected to follow the terms of
+    the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any later
+    version.
+    <br>
+<br>
+
+    FMS is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    <br>
+<br>
+ 
+    You should have received a copy of the GNU General Public License
+    along with this release; if not,
+    <br>
+<br> 
+
+    write to:  Free Software Foundation, Inc.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;59 Temple Place, Suite 330<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;Boston, MA  02111-1307<br>  
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;USA<br>
+    or see:&nbsp;&nbsp;&nbsp;<a href="http://www.gnu.org/licenses/gpl.html">
+        http://www.gnu.org/licenses/gpl.html</a>
+    
+<br>
+<br>
+
+
+
+    
+</font>
+<br>
+<br>
+<sup><a href="#returnfromfootnote1" name="1">1</a></sup>
+    &nbsp;
+    <font size="-1">Mesinger, F., Z. I. Janjic, S. Nickovic, D. Gavrilov and D.
+ G. Deaven, 1988: The step-mountain coordinate: Model description and
+ performance for cases of Alpine lee cyclogenesis and for a case of an
+Appalachian redevelopment. <i>Mon. Wea. Rev.</i>, <td><b>116</b></td>,
+ 1493--1518.</font>
+<br>
+<sup><a href="#returnfromfootnote2" name="2">2</a></sup>
+    &nbsp;
+    <font size="-1">Wyman, B. L., 1996: A step-mountain coordinate general
+ circulation model: Description and validation of medium-range forecasts.
+ <i>Mon. Wea. Rev.</i>, <td><b>124</b></td>, 102--121.</font>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="details%20of%20the%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">2.&nbsp;Details of the code<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#documentation" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">2.1&nbsp;Where to find documentation</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#overview%20of%20finite%20difference%20core" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">2.2&nbsp;Overview of the finite difference core</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#overview%20of%20spectral%20core" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">2.3&nbsp;Overview of the spectral core</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#dynamical%20core%20interface" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">2.4&nbsp;The dynamical core interface</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#shared%20components" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">2.5&nbsp;Shared components</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="documentation" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">2.1&nbsp;Where to find documentation</font></i>
+<br>
+<br>
+<font color="#333333">
+
+In addition to this web page, additional documentation for the atmospheric dynamical cores may be found in these documents:
+
+<ul>
+  
+<li>Technical descriptions of the available cores (pdf files) 
+    <ul>
+
+      
+<li>
+       
+       
+         
+<a href="../src/atmos_bgrid/documentation/bgrid.pdf">Finite differencing used by the B-grid dynamical core</a>
+       
+      
+</li>
+<br>
+<br>
+
+      
+<li>
+       
+       
+         
+<a href="../src/atmos_spectral/documentation/spectral_core.pdf">Spectral dynamical core</a>
+       
+      
+</li>
+<br>
+<br>
+
+      
+<li>
+       
+       
+         
+<a href="..//src/atmos_spectral_barotropic/barotropic.pdf">Barotropic (spectral) version</a>
+       
+      
+</li>
+<br>
+<br>
+
+      
+<li>
+       
+       
+       
+<a href="..//src/atmos_spectral_shallow/shallow.pdf">Shallow-water (spectral) version</a>
+       
+      
+</li>
+<br>
+<br> 
+
+    
+</ul>
+  
+</li>
+<br>
+<br>
+
+  
+<li>HTML documentation files 
+    <ul>
+
+      
+<li>
+       
+              
+         
+<a href="quickstart.html">Quick start guide</a>
+       
+      
+</li>
+<br>
+<br>
+
+      
+<li>
+       
+              
+         
+<a href="index.html">Module documentation that accompanies the code</a>
+       
+      
+</li>
+<br>
+<br>
+
+      
+<li>
+       
+         
+         
+<a href="..//src/atmos_bgrid/documentation/bgrid_supdoc.html">B-grid dynamical core supplementary documentation</a>
+       
+      
+</li>
+<br>
+<br>
+
+   
+</ul>
+  
+</li>
+<br>
+<br>
+
+
+</ul>
+
+ 
+
+      
+</font>
+<br>
+<br>
+<a name="overview%20of%20finite%20difference%20core" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">2.2&nbsp;Overview of the finite difference core</font></i>
+<br>
+<br>
+<font color="#333333">
+
+Key features of the finite difference dynamical core are:
+<br>
+<br>
+
+
+<ul>
+   
+<li>hydrostatic</li>
+<br>
+<br>
+   
+<li>latitude-longitude grid with Arakawa B-grid staggering</li>
+<br>
+<br>
+   
+<li>hybrid sigma-pressure vertical grid</li>
+<br>
+<br>
+   
+<li>prognostic variables are the zonal and meridional wind components,
+             surface pressure, temperature, and an arbitrary number of tracers
+             </li>
+<br>
+<br>
+    
+<li>two-level time differencing scheme
+         <ul>
+             
+<li>gravity waves are integrated using the forward-backward
+                       scheme</li>
+<br>
+<br>
+             
+<li>split time differencing is used for longer advective and
+                       physics time steps</li>
+<br>
+<br>
+         
+</ul>
+    
+</li>
+<br>
+<br>
+    
+<li>pressure gradient options:
+        <ul>
+             
+<li>
+<sup><a href="#3" name="returnfromfootnote3">3</a></sup> Simmons and Burridge (1981) energy, angular momentum
+                       conserving scheme (default)</li>
+<br>
+<br>
+             
+<li>
+<sup><a href="#4" name="returnfromfootnote4">4</a></sup> Lin (1997) finite-volume method</li>
+<br>
+<br>
+        
+</ul>
+    
+</li>
+<br>
+<br>
+    
+<li>default advection option uses centered spatial
+              differencing
+        <ul>
+             
+<li>modified Euler backward time differencing for stability
+                       </li>
+<br>
+<br>
+             
+<li>second and fourth-order options</li>
+<br>
+<br>
+        
+</ul>
+    
+</li>
+<br>
+<br>
+    
+<li>vertical advection option for piecewise linear (van Leer) or
+              parabolic (PPM) finite volume schemes</li>
+<br>
+<br>
+    
+<li>grid point noise and the two-grid-interval computational mode of
+              the B-grid are controlled with linear horizontal
+              damping</li>
+<br>
+<br>
+    
+<li>Fourier filtering in high latitudes of the shortest resolvable
+              waves so that a longer time step can be taken (filter is applied
+              to the mass divergence, horizontal omega-alpha term, horizontal
+              advective tendencies, and the momentum components)</li>
+<br>
+<br>
+    
+<li>optional sponge at top model level to reduce the reflection of
+              waves</li>
+<br>
+<br>
+    
+<li>optional divergence damping, with options for second or
+              fourth-order (much less dissipative)</li>
+<br>
+<br>
+    
+<li>energy conservation guaranteed for long climate runs with a
+              global energy correction to temperature</li>
+<br>
+<br>
+
+</ul>
+
+<br>
+<br>
+
+General features are:
+
+<ul>
+    
+<li>written using Fortran 90</li>
+<br>
+<br>
+    
+<li>meets the code standards of the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a>
+</li>
+<br>
+<br>
+    
+<li>two-dimensional domain decomposition on the longitude/latitude
+              axes</li>
+<br>
+<br>
+    
+<li>array storage by longitude (fastest varying), latitude, level,
+              and tracer number; using indexing (i,j,k,n)</li>
+<br>
+<br>
+
+</ul>
+
+<br>
+<br>
+
+
+      
+</font>
+<br>
+<br>
+<a name="overview%20of%20spectral%20core" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">2.3&nbsp;Overview of the spectral core</font></i>
+<br>
+<br>
+<font color="#333333">
+ 
+Key features of the spectral dynamical core are:
+<br>
+<br>
+
+
+<ul>
+  
+<li>standard spherical harmonic dynamical core for integrating
+          hydrostatic equations for an ideal gas over the sphere. Prognostic
+          variables are vorticity and divergence of horizontal flow,
+          temperature, logarithm of surface pressure, and an arbitrary number
+          of tracers (See Durran, Numerical Methods for Wave Equations in
+          Geophysical Fluid Dynamics, Springer Verlag, 1999)</li>
+<br>
+<br>
+  
+<li>shallow water and non-divergent barotropic models are also provided
+          with pedagogical examples to help introduce users to this spectral
+          framework</li>
+<br>
+<br>
+  
+<li>standard semi-implicit time differencing for gravity waves</li>
+<br>
+<br>
+  
+<li>vertical coordinate surfaces are defined, as in B-grid core, by the
+          set of coefficients (A_k, B_k) where the pressure on the interfaces
+          between layers is  <tt><b>p_k = A_k + B_k p_s</b></tt>. By choosing
+          these coefficients appropriately, one can transition from pure
+          "sigma" coordinate (<tt><b>A = 0</b></tt>) near the surface to pressure
+          coordinates aloft</li>
+<br>
+<br>
+  
+<li>vertical differencing follows Simmons and Burridge (1981)</li>
+<br>
+<br>
+  
+<li>vertical advection module for tracers shared with B-grid
+          core</li>
+<br>
+<br>
+  
+<li>horizontal tracer advection can be performed with standard spectral
+          advection algorithm or with a finite volume scheme. The latter is
+          currently limited to piecewise linear Van Leer, as implemented on
+          the sphere by <sup><a href="#5" name="returnfromfootnote5">5</a></sup> Lin and Rood (1996). A piecewise parabolic scheme will
+          be available shortly, sharing code with the grid core. Mass of
+          tracer is not conserved exactly with either spectral or finite
+          volume scheme in this context, but
+          <a href="#performance">performance</a> in full physics
+          atmospheric model is encouraging</li>
+<br>
+<br>
+  
+<li>damping is Laplacian of vorticity, divergence, temperature, tracer
+          raised to the n'th power; damping not needed for tracers when using
+          finite volume advection</li>
+<br>
+<br>
+  
+<li>sector option ( m-fold symmetry in longitude) also available for
+          dynamical studies</li>
+<br>
+<br>
+
+</ul>
+
+
+
+      
+</font>
+<br>
+<br>
+<a name="dynamical%20core%20interface" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">2.4&nbsp;The dynamical core interface</font></i>
+<br>
+<br>
+<font color="#333333">
+
+We do not specify the precise interface expected of a dynamical core. Within
+<a href="http://www.gfdl.noaa.gov/~fms">FMS</a> we do specify the precise interface for the atmospheric model as a whole,
+so as to allow it to communicate with land, ocean, and ice models. Atmospheric
+models are generally constructed for each core individually from the dynamical
+core and individual physics modules. Sets of physics modules are bundled into
+physics packages that can be used to more easily compare models
+with the same physics and different cores (the Held-Suarez forcing is the
+simplest example of such a package) but we also recognize that different cores
+may require the physics to be called in distinct ways.
+<br>
+<br>
+
+The B-grid and spectral dynamical cores share high-level superstructure code
+and low-level FMS infrastructure codes. The dynamical core is sandwiched
+between these levels. For the simple test cases provided with this release the
+superstructure only consists of a main program, but in more realistic models,
+drivers for component models and coupling software may also be considered part
+of the superstructure. The <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> infrastructure codes, which include many
+commonly-used utilities, are used by both the dynamical core and the
+superstructure code. The following figure depicts this hierarchy of model
+codes.
+<br>
+<br>
+
+
+<img src="interface.jpg" ALT="" border="" height="500" width="650" align=""><br>
+<br>
+
+The dynamical cores have the same user interface at the atmospheric driver
+level. Atmospheric drivers are constructed for each core for specific types of
+models. The drivers included with this public release are for running in a
+dynamical core only mode using simple forcing from a shared module (the
+Held-Suarez GCM benchmark model). Other drivers exist for running coupled
+models using full atmospheric physics in either AMIP mode or fully coupled to
+a realistic ocean, ice, and land model.
+<br>
+<br>
+
+A user selects which dynamical core to use prior to compiling the model. A list
+of path names to the source code of a specific core and the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> shared codes
+is supplied to a compilation script. Refer to section 5 for details on
+compiling the source code.
+
+
+
+      </font>
+<br>
+<br>
+<a name="shared%20components" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">2.5&nbsp;Shared components</font></i>
+<br>
+<br>
+<font color="#333333">
+  
+
+<ol>
+
+  
+<li>FMS infrastructure</li>
+<br>
+<br>
+
+  
+<dl>
+<dt>
+     
+     
+       
+<a href="../src/shared/mpp/mpp.html">parallelization tools</a> 
+     
+    
+</dt>
+<dd>
+         Simple routines that provide a uniform interface to different
+         message-passing libraries, perform domain decomposition and updates,
+         and parallel I/O on distributed systems.
+        </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/fms/fms.html">I/O and restart file utilities</a> 
+     
+     
+</dt>
+<dd>
+        Routines for performing commonly used functions and for reading and
+        writing restart files in native or
+        <a href="http://www.unidata.ucar.edu/packages/netcdf/">NetCDF</a>
+        format.
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/time_manager/time_manager.html">time manager</a> 
+      
+     
+</dt>
+<dd>
+        Simple interfaces for managing and manipulating time and dates. 
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/diag_manager/diag_manager.html">diagnostics manager</a> 
+     
+     
+</dt>
+<dd>
+        Simple calls for parallel 
+        <a href="http://www.unidata.ucar.edu/packages/netcdf/">NetCDF</a>
+        diagnostics on distributed systems. 
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/field_manager/field_manager.html">field</a> and <a href="../src/shared/tracer_manager/tracer_manager.html">tracer manager</a> 
+     
+     
+</dt>
+<dd> 
+        Code to read entries from a
+        <a href="#the%20field%20table">field table</a> and manage the simple
+        addition of tracers to the
+        <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> code. 
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/fft/fft.html">fast Fourier transform</a> 
+      
+     
+</dt>
+<dd> 
+        Performs simultaneous FFTs between real grid space and complex Fourier
+        space.
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/topography/topography.html">topography</a>
+      
+     
+</dt>
+<dd> 
+         Routines for creating land surface topography and land-water masks.
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/constants/constants.html">constants</a>
+     
+     
+</dt>
+<dd> 
+         Sets values of physical constants and pi. 
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/shared/horiz_interp/horiz_interp.html">horiz_interp</a>
+     
+     
+</dt>
+<dd> 
+         Performs spatial interpolation between grids.
+       </dd>
+</dl>
+ 
+<br>
+<br>
+
+
+<li>Atmospheric shared components</li>
+<br>
+<br>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/atmos_shared/vert_advection/vert_advection.html">vertical advection</a>  
+     
+     
+</dt>
+<dd> 
+        Computes a tendency due to vertical advection for an arbitrary
+        quantity.
+       </dd>
+</dl>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/atmos_param/hs_forcing/hs_forcing.html">forcing for Held-Suarez GCM benchmark</a> 
+     
+      
+</dt>
+<dd> 
+        Routines for computing heating and dissipation for the Held-Suarez GCM
+        benchmark integration of a dry GCM.
+       </dd>
+</dl>
+
+ 
+<br>
+<br>
+ 
+<li>FMS superstructure</li>
+<br>
+<br>
+
+  
+<dl>
+<dt>
+     
+     
+      
+<a href="../src/atmos_solo/atmos_model.html">main program</a> 
+      
+      
+</dt>
+<dd> 
+        For running a stand-alone atmospheric model. 
+       </dd>
+</dl>
+
+
+</ol>
+
+
+
+      
+</font>
+<br>
+<br>
+<sup><a href="#returnfromfootnote3" name="3">3</a></sup>
+    &nbsp;
+    <font size="-1">Simmons, A. J. and D. M. Burridge, 1981: An energy and
+ angular-momentum conserving vertical finite-difference scheme and hybrid
+ vertical coordinates. <i>Mon. Wea. Rev.</i>, 
+ <td><b>109</b></td>, 758--766.</font>
+<br>
+<sup><a href="#returnfromfootnote4" name="4">4</a></sup>
+    &nbsp;
+    <font size="-1">Lin, S.-J., 1997: A finite-volume integration method for
+ computing pressure gradient force in general vertical coordinates.
+ <i>Quart. J. Roy. Meteor. Soc.</i>, <td><b>123</b></td>, 1749--1762.</font>
+<br>
+<sup><a href="#returnfromfootnote5" name="5">5</a></sup>
+    &nbsp;
+    <font size="-1">Lin, S.-J. and R. B. Rood, 1996: Multidimensional flux-form
+ semi-lagrangian transport schemes. <i>Quart. J. Roy. Meteor. Soc.</i>, <td><b>123</b></td>, 1749--1762.</font>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="acquiring%20source%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">3.&nbsp;Acquiring CVS source code<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#acquire_code" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">3.1&nbsp;How to acquire CVS source code</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#cvs" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">3.2&nbsp;What is CVS?</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#gforge" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">3.3&nbsp;What is GForge?</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#cvs%20details" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">3.4&nbsp;CVS details</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="acquire_code" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">3.1&nbsp;How to acquire CVS source code</font></i>
+<br>
+<br>
+<font color="#333333">
+
+The <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> development team uses
+a local implementation of <a href="http://fms.gfdl.noaa.gov">GForge</a> to
+serve FMS software, located at <a href="http://fms.gfdl.noaa.gov">http://fms.gfdl.noaa.gov</a>. In order to obtain the source code, you must
+<a href="https://fms.gfdl.noaa.gov/account/register.php">register</a> as
+an FMS user on our software server. After submitting the registration form on
+the software server, you should receive an automatically generated confirmation
+email within a few minutes. Clicking on the link in the email confirms the
+creation of your account.
+<br>
+<br>
+
+After your account has been created, you should
+<a href="https://fms.gfdl.noaa.gov/account/login.php">log in</a> and
+request access to the <a href="http://www.gfdl.noaa.gov">Flexible Modeling
+System</a> project. Once the FMS project administrator grants you access,
+you will receive a second e-mail notification. This email requires action on
+the part of the project administrator and thus may take longer to arrive. The
+email will contain a software access password along with instructions for
+obtaining the release package, which are described below.
+<br>
+<br>
+
+ To check out the release package containing source code, scripts, and
+documentation via CVS, type the following commands into a shell window. You
+ might wish to first create a directory called <tt><b>fms</b></tt> in which to run
+these commands. You should enter the software access password when prompted by
+the <tt><b>cvs login</b></tt> command. At cvs login, the file
+<tt><b>~/.cvspass</b></tt> is read. If this file does not already exist, an error
+message may display and the cvs login may fail. In this event, you should
+first create this file via <tt><b>touch ~/.cvspass</b></tt>.
+
+<br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+  cvs -z3 -d:pserver:cvs@fms.gfdl.noaa.gov:/cvsroot/atm-dycores login<br>
+  cvs -z3 -d:pserver:cvs@fms.gfdl.noaa.gov:/cvsroot/atm-dycores co -r jakarta atm_dycores
+    </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+This will create a directory called <tt><b>atm_dycores</b></tt> in your current
+working directory containing the release package.
+<br>
+<br>
+
+If you prefer not to use CVS, you may download the tar file called
+<tt><b>atm_dycores.tar.gz</b></tt> from <a href="https://fms.gfdl.noaa.gov/projects/atm-dycores/">https://fms.gfdl.noaa.gov/projects/atm-dycores/</a>.
+Sample output is also available there for download. See
+<a href="#model%20output">Section 6.1</a> for more information on the
+sample output.
+<br>
+<br>
+
+
+
+      
+</font>
+<br>
+<br>
+<a name="cvs" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">3.2&nbsp;What is CVS?</font></i>
+<br>
+<br>
+<font color="#333333">
+ 
+<a href="http://www.gfdl.noaa.gov/~fms">FMS</a> code is maintained under a software version control system, the <a href="http://www.cvshome.org/">Concurrent Versions System (CVS)</a>. CVS provides a set of tools for management
+of source codes with multiple users and developers distributed across a wide
+area network. It maintains all source code files as history files, in which
+different versions are stored as incremental differences from a base file.
+These history files exist in a directory tree called a repository. Normally,
+the files in the repository are never accessed directly. Instead, CVS
+commands are used to obtain a working copy of the files in a working
+directory. In CVS terminology, this is called checking out the code from the
+repository. After the source code has been edited, the user checks in (or
+commits) the files back into the repository. The repository then contains the
+changes, and they are accessible to other users.
+<br>
+<br>
+
+For a comprehensive source of CVS features, commands and options, consult the 
+<a href="http://www.cvshome.org/docs/manual">CVS manual</a>.
+<br>
+<br>
+
+
+      
+</font>
+<br>
+<br>
+<a name="gforge" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">3.3&nbsp;What is GForge?</font></i>
+<br>
+<br>
+<font color="#333333">
+ 
+<a href="http://www.gforge.org">GForge</a> is an Open Source collaborative software development tool, which
+allows organization and management of any number of software development
+projects. It is designed for managing large teams of software engineers
+and/or engineers scattered among multiple locations. Gforge is available at 
+<a href="http://www.gforge.org">http://www.gforge.org</a>. General user
+documentation can be found at <a href="http://gforge.org/docman/?group_id=1">http://gforge.org/docman/?group_id=1</a>. 
+<br>
+<br>
+
+
+      
+</font>
+<br>
+<br>
+<a name="cvs%20details" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">3.4&nbsp;CVS details</font></i>
+<br>
+<br>
+<font color="#333333">
+
+On UNIX systems, the command <tt><b>which cvs</b></tt> can be used to verify that
+CVS is installed. Please contact your system administrator if CVS is not
+installed on your system.
+<br>
+<br>
+
+The <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> source code is checked
+out of the CVS repository through remote (<tt><b>:pserver:</b></tt>) login.
+At cvs login, the file <tt><b>~/.cvspass</b></tt> is read. If this file does not
+exist, an error message may display and the login may fail. In this event, the
+user should first create a <tt><b>~/.cvspass</b></tt> file using the UNIX <tt><b>touch</b></tt> command. Then the user should be able to access CVS via remote 
+login.
+<br>
+<br>
+
+The <tt><b>-d</b></tt> option to cvs commands specifies the location of
+the CVS repository. The user may choose to set the <tt><b>$CVSROOT</b></tt>
+environment variable to the string "<tt><b>:pserver:cvs@fms.gfdl.noaa.gov:/cvsroot/atm-dycores</b></tt>". This optional step will free the user from specifying the
+location of the repository each time a CVS command is entered. 
+<br>
+<br>
+
+
+
+      
+</font>
+<br>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="compiling%20the%20source%20code" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">4.&nbsp;Compiling the source code<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#mkmf" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">4.1&nbsp;The mkmf utility</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#creating%20the%20makefile" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">4.2&nbsp;Creating the makefile</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#example:%20compiling%20the%20code" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">4.3&nbsp;Example: Compiling the source code</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#compiling%20without%20mpi" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">4.4&nbsp;Compiling without MPI</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="mkmf" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">4.1&nbsp;The mkmf utility</font></i>
+<br>
+<br>
+<font color="#333333">
+
+
+
+<a href="../src/path_names.html"><tt><b>*_pathnames.html</b></tt></a>
+
+
+, in the <tt><b>atm_dycores/input</b></tt> directory, is a file created for the user's convenience and contains links to all the documentation files that have been checked out with the source code. A listing of relative path names to all checked out source code files is included in the <tt><b>*_pathnames</b></tt> file, located in the <tt><b>atm_dycores/input</b></tt> directory. This file is used in combination with the <a href="#creating%20the%20makefile">makefile</a> utility
+
+
+
+<a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+, located in the <tt><b>atm_dycores/bin</b></tt> directory. Prior to compiling the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> source code, a <a href="#creating%20the%20makefile">makefile</a> must be created. A <a href="#creating%20the%20makefile">makefile</a> is used to determine the source code dependencies and the order in which source code files will be compiled.&nbsp;<tt><b>mkmf</b></tt> ("make-make-file" or "make-m-f") is a tool written in perl5 that will construct a <a href="#creating%20the%20makefile">makefile</a> from distributed source. The result of the
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+utility is a single executable program. Note that
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+must be used when executing the <a href="#the%20runscript">runscripts</a>.
+<br>
+<br> 
+
+
+
+ 
+<a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+has the ability to understand dependencies in f90, such as modules and use, the FORTRAN include statement and the cpp #include statement in any type of source. 
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+also places no restrictions on filenames, module names, etc. The utility supports the concept of overlays, where source is maintained in layers of directories with a defined precedence. In addition,
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+can keep track of changes to cpp flags and knows when to recompile the affected source. This refers to files containing <tt><b>#ifdefs</b></tt> that have been changed since the last invocation. 
+<br>
+<br>
+
+The calling syntax and associated arguments are:
+
+
+        
+        <br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+                mkmf [-a abspath][-c cppdefs][-d][-f][-m makefile][-p program] \
+                <br>&nbsp;&nbsp;&nbsp;[-t template][-v][-x][args]
+             </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+
+
+
+        
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><i>
+                attaches the absolute path to the
+                front of all relative paths
+                to source files
+             </i></td><td><b><tt>
+                -a abspath
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                list of cpp #defines to be
+                passed to the source files
+             </i></td><td><b><tt>
+                -c cppdefs
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                debug flag
+             </i></td><td><b><tt>
+                -d
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                formatting flag
+             </i></td><td><b><tt> 
+                -f
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                name of <a href="#creating%20the%20makefile">makefile</a> written
+             </i></td><td><b><tt>
+                -m makefile
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                final target name
+             </i></td><td><b><tt>
+                -p program
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                file containing a list of
+                make macros or commands
+             </i></td><td><b><tt>
+                -t template
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                verbosity flag
+             </i></td><td><b><tt>
+                -v
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                executes the <a href="#creating%20the%20makefile">makefile</a> immediately
+             </i></td><td><b><tt>
+                -x
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                list of directories and files to be
+                searched for targets and dependencies
+             </i></td><td><b><tt>
+                args
+             </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+
+The debug flag is much more verbose than <tt><b>-v</b></tt> and used only if you are modifying <tt><b>mkmf</b></tt> itself. The formatting flag restricts the lines in the <a href="#creating%20the%20makefile">makefile</a> to 256 characters. Lines exceeding 256 characters use continuation lines. If filenames are omitted for the options <tt><b>[-m makefile]</b></tt> and <tt><b>[-p program]</b></tt>, the defaults <a href="#creating%20the%20makefile"><tt><b>Makefile</b></tt></a> and <tt><b>a.out</b></tt> are applied. The list of make macro or commands contained in <tt><b>[-t template]</b></tt> are written to the beginning of the <a href="#creating%20the%20makefile">makefile</a>. 
+<br>
+<br>
+
+
+
+        
+</font>
+<br>
+<br>
+<a name="creating%20the%20makefile" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">4.2&nbsp;Creating the makefile</font></i>
+<br>
+<br>
+<font color="#333333">
+ 
+When the 
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+utility is executed, it reads a template file and runs a list of make macros, commands and compilers. The template is a platform-specific file that contains standard compilation flags. Default template files are provided with the <a href="http://www.gfdl.noaa.gov">FMS</a> source code and are located in the <tt><b>atm_dycores/bin</b></tt> directory. It is recommended that users set up their own compilation template specific for their platform and compiler. The template file contains the following variables: 
+
+
+
+      
+        <br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><i>
+                compiler for FORTRAN files
+             </i></td><td><b><tt>
+                FC
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                executable for the loader step
+             </i></td><td><b><tt>
+                LD
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                cpp options that do not change between compilations
+             </i></td><td><b><tt>
+                CPPFLAGS
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                flags to the compiler FC
+             </i></td><td><b><tt>
+                FFLAGS
+             </tt></b></td>
+</tr>
+<tr>
+<td><i>
+                flags to the loader step
+             </i></td><td><b><tt>
+                LDFLAGS
+             </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+       
+
+For example, the template file for the SGI MIPSpro compiler contains: 
+
+
+
+   
+        <br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+                 FC = f90<br>
+                 LD = f90<br>
+                 LDFLAGS = -64 -mips4 -lexc -lscs -lmpi -L/usr/local/lib -lnetcdf<br>
+                 CPPFLAGS = -macro_expand -Dsgi_mipspro -Duse_netCDF -I/usr/local/include<br>
+                 FFLAGS = -OPT:Olimit=0 -O2 -r8 -d8 -i4 -64 -mips4 -expand_source -I/usr/local/include<br>
+              
+</tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+
+An include file is any file with an include file suffix, such as <tt><b>.H</b></tt>, <tt><b>.fh</b></tt>, <tt><b>.h</b></tt>, <tt><b>.inc</b></tt>, which is recursively searched for embedded includes.
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+first attempts to locate the include file in the same directory as the source file. If it is not found there, it looks in the directories listed as arguments, maintaining a left-to-right precedence. The argument list, <tt><b>args</b></tt>, is also treated sequentially from left to right. The default action for non-existent files is to create null files of that name in the current working directory via the UNIX <tt><b>touch</b></tt> command. There should be a single main program source among the arguments to
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+, since all the object files are linked to a single executable.  
+<br>
+<br>
+
+The argument <tt><b>cppdefs</b></tt> should contain a comprehensive list of the cpp #defines to be preprocessed. This list is compared against the current "state", which is maintained in the file <tt><b>.cppdefs</b></tt> in the current working directory. If there are any changes to this state, <tt><b>mkmf</b></tt> will remove all object files affected by this change so that the subsequent make will recompile those files. The file <tt><b>.cppdefs</b></tt> is created if it does not exist. <tt><b>.cppdefs</b></tt> also sets the make macro <tt><b>CPPDEFS</b></tt>. If this was set in a template file and also in the <tt><b>-c</b></tt> flag to <tt><b>mkmf</b></tt>, the value in <tt><b>-c</b></tt> takes precedence. Typically, you should set only <tt><b>$CPPFLAGS</b></tt> in the template file and <tt><b>CPPDEFS</b></tt> via <tt><b>mkmf -c</b></tt>.
+<br>
+<br>
+
+To execute the
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+utility, the user must locate the appropriate <tt><b>*_pathnames</b></tt> file in the <tt><b>atm_dycores/input</b></tt> directory: <tt><b>barotropic_pathnames</b></tt>, <tt><b>bgrid_pathnames</b></tt>, <tt><b>shallow_pathnames</b></tt>, or <tt><b>spectral_pathnames</b></tt>. The script <tt><b>list_paths</b></tt>, in the <tt><b>atm_dycores/bin</b></tt> directory, can be used to create a new <tt><b>*_pathnames</b></tt> file if the original file has been modified or additional source code files need to be compiled. In the working directory containing the <a href="http://www.gfdl.noaa.gov">FMS</a> source code, the user should set up the compilation template file and execute the <tt><b>mkmf</b></tt> utility. Next, create a compilation directory and copy the <tt><b>Makefile</b></tt> there.
+
+
+
+
+The <tt><b>Makefile</b></tt> is created in the compilation directory using the <tt><b>make</b></tt> command.
+<br>
+<br>
+
+
+        
+</font>
+<br>
+<br>
+<a name="example:%20compiling%20the%20code" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">4.3&nbsp;Example: Compiling the source code</font></i>
+<br>
+<br>
+<font color="#333333">
+
+The following example demonstrates how to create the <a href="#creating%20the%20makefile">makefile</a> and compile the <tt><b>fms_atm_dycores</b></tt> module of the <a href="http://www.gfdl.noaa.gov">FMS</a> Jakarta source code. This step is necessary when executing the <a href="#the%20runscript">runscript</a>.
+
+        <ul>
+          
+<li>
+             Locate the appropriate <tt><b>*_pathnames</b></tt> file in 
+             the <tt><b>atm_dycores/input directory</b></tt>.
+          </li>
+<br>
+<br>
+          
+<li>          
+             Execute the <tt><b>list_paths</b></tt> script, if needed:<br>
+          
+<tt><b>atm_dycores/bin/list_paths</b></tt>
+          
+</li>
+<br>
+<br>
+          
+<li>
+             Set up a compilation template for the platform and compiler.
+             Sample templates are located in <tt><b>atm_dycores/bin</b></tt>.
+          </li>
+<br>
+<br>
+          
+<li>
+             Execute the <tt><b>mkmf</b></tt> utility in the directory containing
+             the FMS source code using the appropriate <tt><b>*_pathnames</b></tt>
+             file. <tt><b>fms.exe</b></tt> is the executable for this example.
+             <br>
+          
+<tt><b>
+             cd atm_dycores<br>
+             [path_to_mkmf]/mkmf -p fms.exe -t [path_to_compiler]/template.[ext] -c "-Duse_libMPI" -a "$cwd" spectral_pathnames
+          </b></tt>
+          
+</li>
+<br>
+<br>
+          
+<li>
+             Create a compilation directory and copy the <tt><b>Makefile</b></tt>
+             there:<br>
+          
+<tt><b>
+             mkdir exec_coupled<br> 
+             cp Makefile exec_spectral
+          </b></tt>
+          
+</li>
+<br>
+<br>
+          
+<li>
+             Compile the code in the compilation directory:<br>
+          
+<tt><b>
+             cd exec_spectral<br>
+             make
+          </b></tt>
+          
+</li>
+<br>
+<br>
+         
+</ul>
+        
+
+        
+</font>
+<br>
+<br>
+<a name="compiling%20without%20mpi" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">4.4&nbsp;Compiling without MPI</font></i>
+<br>
+<br>
+<font color="#333333">
+
+Underlying <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> is a modular parallel computing infrastructure. MPI (Message-Passing Interface) is a standard library developed for writing message-passing programs for distributed computing across loosely-coupled systems. Incorporated in the <a href="http://www.gfdl.noaa.gov">FMS</a> source code is
+
+
+
+ <a href="../src/shared/mpp/mpp.html"><tt><b>MPP</b></tt></a>
+
+
+(Massively Parallel Processing), which provides a uniform message-passing API interface to the different message-passing libraries. Together, MPI and MPP establish a practical, portable, efficient, and flexible standard for message passing.
+<br>
+<br>
+
+There are a number of freely available implementations of MPI that run on a variety of platforms. The MPICH implementation, developed by researchers at Argonne National Lab and Mississippi State University, runs on many different platforms, from networks of workstations to MPPs. If MPICH is installed, the user can compile the source code with MPI. If the user does not have MPICH or the communications library, the <a href="http://www.gfdl.noaa.gov">FMS</a> source code can be compiled without MPI in one of two ways. If the <a href="#creating%20the%20makefile">makefile</a> is  created external to the <a href="#the%20runscript">runscript</a>, omit the <tt><b>-c cppdefs</b></tt> flag from the
+
+
+
+ <a href="../bin/mkmf.html"><tt><b>mkmf</b></tt></a>
+
+
+syntax. To compile the <a href="http://www.gfdl.noaa.gov">FMS</a> source code without MPI delete <tt><b>-Duse_libMPI</b></tt> from the <tt><b>cppflags</b></tt> variable.
+<br>
+<br>
+     
+When MPI is not used, the messages from MPP_lib may display but the data is being copied by MPP. Compiling the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> source code without MPI has been tested and the results show that 1 GB of memory is required for executing the code with and without MPI on a single PE. 
+<br>
+<br>
+      
+
+      
+</font>
+<br>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="preparing%20the%20runscript" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">5.&nbsp;Preparing the runscript<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#the%20runscript" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.1&nbsp;The runscript</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#the%20diagnostic%20table" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.2&nbsp;The diagnostic table</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#the%20field%20table" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.3&nbsp;The field table</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#namelist%20options" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.4&nbsp;Namelist options</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#ic_restarts" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.5&nbsp;Initial conditions and restart files</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#mppnccombine" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">5.6&nbsp;mppnccombine</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="the%20runscript" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.1&nbsp;The runscript</font></i>
+<br>
+<br>
+<font color="#333333">
+
+Simple (csh shell) scripts are provided for running the atmospheric dynamical
+cores. These runscripts perform the minimum required steps to compile and 
+run the models and are intended as a starting point for the development of more practical run scripts. The scripts for all available dynamical core models are
+located in the <tt><b>scripts</b></tt> directory and are called
+
+
+
+<a href="../scripts/run_bgrid"><tt><b>run_bgrid</b></tt></a>
+
+
+,
+
+
+
+<a href="../scripts/run_spectral"><tt><b>run_spectral</b></tt></a>
+
+
+,
+
+
+
+<a href="../scripts/run_spectral_barotropic"><tt><b>run_spectral_barotropic</b></tt></a>
+
+
+, and
+
+
+
+<a href="../scripts/run_spectral_shallow"><tt><b>run_spectral_shallow</b></tt></a>
+
+
+.
+<br>
+<br>  
+
+Near the top of the scripts, variables are set to the full path name of the initial condition (optional), <a href="#the%20diagnostic%20table">diagnostics table</a>, <a href="#the%20field%20table">tracer field table</a> (optional),
+compilation directory, and the <a href="#mppnccombine"><i>mppnccombine</i></a> script. The script proceeds to compile and link the source code, create a working directory, and copy the
+required input data into the working directory. The <tt><b>mpirun</b></tt> command is then used to run the model. The final step for multi-processor runs, is to combine domain-decomposed diagnostics files into global files.
+<br>
+<br> 
+
+The default the scripts are set to run one or two days on a single processor. The number of processors used is controlled by a variable near the top of the
+scripts. Users may want to increase the number of processors to decrease the wallclock time needed for a run. The run length (in days) and the atmospheric
+time step (<tt><b>dt_atmos</b></tt>) in seconds is controlled by namelist <i>&amp;main_nml</i> which is set directly in the runscripts for convenience.
+<br>
+<br> 
+
+To compile and link the model codes a template file provides platform dependent parameters, such as the location of the netCDF library on your system, to
+a compilation utility called
+
+
+
+<a href="../bin/mkmf.html">mkmf</a>
+
+
+. Sample template files for various platforms are provided in the <tt><b>bin</b></tt> directory. More information on mkmf and compiling the source code can be found in <a href="#compiling%20the%20source%20code">Section 4</a>.
+<br>
+<br> 
+
+The sample scripts compile the model code with the MPI library and execute using the mpirun command. Refer to <a href="#compiling%20without%20mpi">Section 4.4</a> for issues related to the MPI implementation and for compiling without MPI. The mpirun command is specific to Silicon Graphics machines, and users may need to change this to run on other platforms.
+<br>
+<br> 
+
+The following sections will describe some of the steps needed to understand and modify the simple runscripts.
+<br>
+<br> 
+
+
+
+        
+</font>
+<br>
+<br>
+<a name="the%20diagnostic%20table" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.2&nbsp;The diagnostic table</font></i>
+<br>
+<br>
+<font color="#333333">
+
+The <a href="http://www.gfdl.noaa.gov/~fms">FMS</a>
+
+
+
+<a href="../src/shared/diag_manager/diag_manager.html">diagnostics manager</a>
+
+
+is used to save diagnostic fields to <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> files. Diagnostic output is controlled by specifying file and field names in an ASCII table called <tt><b>diag_table</b></tt>. The diagnostic tables supplied with the dynamical cores are found in the <tt><b>input</b></tt> directory and are called
+
+
+
+<tt><b><a href="../input/hs_diag_table">hs_diag_table</a></b></tt>
+
+
+,
+
+
+
+<tt><b><a href="../input/spectral_barotropic_diag_table">spectral_barotropic_diag_table</a></b></tt>
+
+
+, and
+
+
+
+  <a href="../input/spectral_shallow_diag_table"><tt><b>spectral_shallow_diag_table</b></tt></a>
+
+
+
+. The B-grid and spectral cores uses the same diagnostics table (
+
+
+
+<a href="../input/hs_diag_table"><tt><b>hs_diag_table</b></tt></a>
+
+
+) for the Held-Suarez benchmark test case. In the <a href="#the%20runscript">runscript</a>, the user specifies the full path to the appropriate diagnostics table, and it is copied to file <tt><b>diag_table</b></tt>.
+<br>
+<br>
+
+The diagnostic table consists of comma-separated ASCII values and may be edited
+by the user. The table is separated into three sections: the global section,
+file section and field section. The first two lines of the table comprise the
+global section and contain the experiment title and base date. The base date is
+the reference time used for the time axis. For the solo dynamical cores the
+base date is irrelevant and is typically set to all zeroes. The lines in the
+file section contain the file name, output frequency, output frequency units,
+file format (currently, only netCDF), time units and long name for the time
+axis. The last section, the field section, contains the module name, field
+name, output field name, file name, time sampling for averaging (currently,
+all time steps), time average (.true. or .false.), other operations which are
+not implemented presently and the packing value. The packing value defines the precision of the output: 1 for double, 2 for floating, 4 for packed 16-bit integers and 8 for packed 1-byte. Any line that begins with a "<tt><b>#</b></tt>" is
+skipped. 
+<br>
+<br>
+
+A sample diagnostic table is displayed below.
+
+<br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+      
+<pre>
+      "Model results from the Held-Suarez benchmark"
+      0 0 0 0 0 0
+      #output files
+      "atmos_daily",    24, "hours", 1, "days", "time", 
+      "atmos_average",  -1, "hours", 1, "days", "time", 
+      #diagnostic field entries
+      "dynamics",   "ps",      "ps",      "atmos_daily",    "all", .false., "none", 2,
+      "dynamics",   "bk",      "bk",      "atmos_average",  "all", .false., "none", 2,
+      "dynamics",   "pk",      "pk",      "atmos_average",  "all", .false., "none", 2,
+      "dynamics",   "zsurf",   "zsurf",   "atmos_average",  "all", .false., "none", 2,
+      "dynamics",   "ps",      "ps",      "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "ucomp",   "ucomp",   "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "vcomp",   "vcomp",   "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "temp",    "temp",    "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "omega",   "omega",   "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "tracer1", "tracer1", "atmos_average",  "all", .true.,  "none", 2,
+      "dynamics",   "tracer2", "tracer2", "atmos_average",  "all", .true.,  "none", 2,
+      #"hs_forcing", "teq",     "teq",     "atmos_average",  "all", .true.,  "none", 2,
+     </pre>
+   
+</tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+
+
+        
+</font>
+<br>
+<br>
+<a name="the%20field%20table" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.3&nbsp;The field table</font></i>
+<br>
+<br>
+<font color="#333333">
+
+The <a href="http://www.gfdl.noaa.gov">FMS</a>
+
+
+
+<a href="../src/shared/field_manager/field_manager.html">field</a>
+
+
+and
+
+
+
+<a href="../src/shared/tracer_manager/tracer_manager.html">tracer managers</a>
+
+
+are used to manager tracers and specify tracer options. All tracers used by the model must be registered in an ASCII table called <tt><b>field_table</b></tt>. The field tables supplied with the dynamical cores are found in the <tt><b>input</b></tt> directory. There are separate field tables for the B-grid and spectral core called
+
+
+
+<tt><b><a href="../input/bgrid_field_table">bgrid_field_table</a></b></tt>
+
+
+and
+
+
+
+<tt><b><a href="../input/spectral_field_table">spectral_field_table</a></b></tt>
+
+
+. There are no field tables for the barotropic or shallow-water models. In the <a href="#the%20runscript">runscript</a>, the user specifies the full path to the appropriate field table, and it is copied to file <tt><b>field_table</b></tt>.
+<br>
+<br>
+
+The field table consists of entries in the following format. The first line of
+an entry should consist of three quoted strings. The first quoted string will
+tell the
+
+
+
+<a href="../src/shared/field_manager/field_manager.html">field manager</a>
+
+
+what type of field it is. The string "<tt><b>tracer</b></tt>" is used to declare a tracer field entry. The second quoted string will tell the <a href="../src/shared/field_manager/field_manager.html">field manager</a> which model the field is being applied to. The supported types at present are "<tt><b>atmos_mod</b></tt>" for the atmosphere model, "<tt><b>ocean_mod</b></tt>" for the ocean model, "<tt><b>land_mod</b></tt>" for the land model, and, "<tt><b>ice_mod</b></tt>" for the ice model. The third quoted string should be a unique tracer name that the model will recognize.
+<br>
+<br>
+
+The second and following lines of each entry are called <tt><b>methods</b></tt> in
+this context. Methods can be developed within any module and these modules can
+query the
+
+
+
+<a href="../src/shared/field_manager/field_manager.html">field manager</a>
+
+
+to find any methods that are supplied in the field table. These lines can consist of two or three quoted strings. The first string will be an identifier that the querying module will ask for. The second string will be a name that the querying module can use to set up values for the module. The third string, if present, can supply parameters to the calling module that can be parsed and used to further modify values. An entry is ended with a backslash (/) as the final character in a row. Comments can be inserted in the field table by having a <tt><b>#</b></tt> as the first character in the line.
+<br>
+<br>
+
+Here is an example of a field table entry for an idealized tracer called "gunk".
+
+<br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+      
+<pre>
+       "TRACER",     "atmos_mod",               "gunk"
+       "longname",   "really bad stuff" 
+       "units",      "kg/kg"
+       "advec_vert", "finite_volume_parabolic"
+       "diff_horiz", "linear",                  "coeff=.30" / 
+     </pre>
+    
+</tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+In this example, we have a simple declaration of a tracer called
+"<tt><b>gunk</b></tt>". Methods that are being applied to this tracer include
+setting the long name of the tracer to be "<tt><b>really bad stuff</b></tt>", the
+units to "<tt><b>kg/kg</b></tt>", declaring the vertical advection method to be
+"<tt><b>finite_volume_parabolic</b></tt>", and the horizontal diffusion method to
+be "<tt><b>linear</b></tt>" with a coefficient of "<tt><b>0.30</b></tt>".
+<br>
+<br>
+
+A <tt><b>method</b></tt> is a way to allow a component module to alter the
+parameters it needs for various tracers. In essence, this is a way to modify a 
+default value. A namelist can supply default parameters for all tracers and a
+method, as supplied through the field table, will allow the user to modify the
+default parameters on an individual tracer basis.
+<br>
+<br>
+
+The following web-based documentation describes the available <i>method_types</i> for the dynamical cores.
+<br>
+<br>
+
+
+<ul>
+
+
+<li>
+
+
+
+<a href="../src/atmos_bgrid/model/bgrid_advection.html#FIELD_TABLE">B-grid: advection and filling</a>
+
+
+</li>
+<br>
+<br>
+
+
+<li>
+
+
+
+<a href="../src/atmos_bgrid/model/bgrid_horiz_diff.html#FIELD_TABLE">B-grid: horizontal damping</a>
+
+
+</li>
+<br>
+<br> 
+
+
+<li>
+
+
+
+<a href="../src/atmos_spectral/model/spectral_dynamics.html#FIELD_TABLE">Spectral: all tracer options</a>
+
+
+</li>
+<br>
+<br> 
+
+
+</ul>
+
+
+
+        
+</font>
+<br>
+<br>
+<a name="namelist%20options" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.4&nbsp;Namelist options</font></i>
+<br>
+<br>
+<font color="#333333">
+
+Many model options are configurable at runtime using namelist input. All <a href="http://www.gfdl.noaa.gov/~fms">FMS</a>
+modules read their namelist records from a file called <tt><b>input.nml</b></tt>. A
+module will read <tt><b>input.nml</b></tt> sequentially until the first occurrence
+of its namelist record is found. Only the first namelist record found is used.
+Most (if not all) namelist variables have default values, so it is not
+necessary to list all namelist records in the <tt><b>input.nml</b></tt> file. The
+runscripts provided set up the file <tt><b>input.nml</b></tt> by concatenating a 
+core-specific namelist file to the namelists for several shared modules. The
+core-specific namelists provided with this release are found in the
+<tt><b>input</b></tt> directory and are called
+
+
+
+<tt><b><a href="../input/bgrid_namelist">bgrid_namelist</a></b></tt>
+
+
+,
+
+
+
+<tt><b><a href="../input/spectral_namelist">spectral_namelist</a></b></tt>
+
+
+,
+
+
+
+<tt><b><a href="../input/spectral_barotropic_namelist">spectral_barotropic_namelist</a></b></tt>
+
+
+
+, and
+
+
+
+<tt><b><a href="../input/spectral_shallow_namelist">spectral_shallow_namelist</a></b></tt>
+
+
+.
+<br>
+<br>
+
+
+
+<ul>
+ 
+<li>
+Summary of namelist records for the B-grid core:
+ </li>
+<br>
+<br>
+ 
+<dl>
+<dt>
+    
+    
+      
+<tt><b><a href="../src/atmos_bgrid/model/bgrid_core_driver.html#NAMELIST">bgrid_core_driver_nml</a></b></tt>
+    
+   
+</dt>
+<dd>
+      The main namelist for the B-grid core. It controls the following options:
+      time splitting, domain layout, polar filtering, pressure gradient,
+       divergence damping, energy conservation, and <a href="#ic_restarts">restart file</a> format.
+   </dd>
+</dl>
+
+
+<dl>
+<dt>    
+   
+   
+    
+<tt><b><a href="../src/atmos_bgrid/model/bgrid_advection.html#NAMELIST">bgrid_advection_nml</a></b></tt> 
+   
+  
+</dt>
+<dd>
+    advection scheme and tracer filling options 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+    
+    
+       
+<tt><b><a href="../src/atmos_bgrid/model/bgrid_horiz_diff.html#NAMELIST">bgrid_horiz_diff_nml</a></b></tt> 
+    
+  
+</dt>
+<dd>
+      horizontal damping order and coefficients 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+     
+<tt><b><a href="../src/atmos_bgrid/model/bgrid_sponge.html#NAMELIST">bgrid_sponge_nml</a></b></tt> 
+  
+</dt>
+<dd> 
+      top model level sponge coefficients 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+    
+    
+      
+<tt><b><a href="../src/atmos_bgrid/tools/bgrid_integrals.html#NAMELIST">bgrid_integrals_nml</a></b></tt>
+    
+  
+</dt>
+<dd>  
+      used to set the file name and output interval for global integrals 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+    
+    
+      
+<tt><b><a href="../src/atmos_bgrid/tools/bgrid_cold_start.html#NAMELIST">bgrid_cold_start_nml</a></b></tt>
+    
+  
+</dt>
+<dd>   
+      needed for cold-starting the model, only read when the <a href="#ic_restarts">restart file</a> does
+      not exist.
+    </dd>
+</dl>
+
+<br>
+<br>
+
+
+<li>
+Summary of namelist records for the spectral core:
+</li>
+<br>
+<br>
+
+
+<dl>
+<dt>    
+    
+    
+      
+<tt><b><a href="../src/atmos_spectral/model/spectral_dynamics.html#NAMELIST">spectral_dynamics_nml</a></b></tt>
+    
+  
+</dt>
+<dd>  
+      The main namelist for the spectral core. 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+    
+    
+      
+<tt><b><a href="../src/atmos_spectral/tools/transforms.html#NAMELIST">transforms_nml</a></b></tt>
+    
+  
+</dt>
+<dd> 
+      namelist for spectral transforms package 
+    </dd>
+</dl>
+
+<br>
+<br>
+
+
+<li>
+Summary of namelist records for miscellaneous modules:
+</li>
+<br>
+<br>
+
+
+<dl>
+<dt>    
+    
+    
+      
+<tt><b><a href="../src/atmos_solo/atmos_model.html#NAMELIST">main program namelist</a></b></tt> 
+    
+  
+</dt>
+<dd> 
+      sets time related variables such as model time step and duration of the
+      run
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+    
+    
+     
+<tt><b><a href="../src/atmos_param/hs_forcing/hs_forcing.html#NAMELIST">Held-Suarez forcing</a></b></tt>
+    
+  
+</dt>
+<dd>  
+      sets parameters related to Held-Suarez forcing 
+    </dd>
+</dl>
+
+
+<dl>
+<dt>    
+   
+   
+     
+<tt><b><a href="../src/shared/fms/fms.html#NAMELIST">FMS namelist</a></b></tt> 
+   
+  
+</dt>
+<dd>   
+      sets <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> infrastructure options
+   </dd>
+</dl>
+
+<br>
+<br>
+
+
+<li>
+Examples of common namelist option changes:
+</li>
+<br>
+<br>
+
+
+<dl>
+<dt>    
+    
+<tt><b>Change the run length</b></tt>  
+  
+</dt>
+<dd>    
+      The default run length set in the simple <a href="#the%20runscript">runscripts</a> is relatively short.
+      The run length is set in the namelist for the main program, which can be
+      found in the <a href="#the%20runscript">runscripts</a>. For example, in
+         
+         
+           <tt><b><a href="../scripts/run_bgrid">run_bgrid</a></b></tt>
+         
+
+or
+
+
+
+  <tt><b><a href="../scripts/run_spectral">run_spectral</a></b></tt>
+
+
+the following change will increase the run length to 200 days.<br>
+
+
+<tt><b>&amp;main_nml   days = 200 /</b></tt>
+   
+</dd>
+</dl>   
+
+
+<dl>
+<dt>    
+     
+<tt><b>Change the model resolution</b></tt>  
+  
+</dt>
+<dd>    
+      Because the simple test cases internally generate their initial state,
+      the model resolution can be easily changed through namelist variables.
+      For the B-grid core, modify the following namelist found in file
+
+    
+    
+      <tt><b><a href="../input/bgrid_namelist">input/bgrid_namelist</a></b></tt>
+    
+
+      . Note that <tt><b>nlon</b></tt> and
+      <tt><b>nlat</b></tt> must be even numbers, and too low a resolution may
+      result in an unphysical solution.<br>
+         
+<tt><b>&amp;bgrid_cold_start_nml   nlon = 90, nlat = 60, nlev = 10 /</b></tt>
+
+      
+<br>
+<br>
+      For a <i>T63</i> spectral core, modify the following namelist
+      variables found in file
+
+        
+        
+          <tt><b><a href="../input/spectral_namelist">input/spectral_namelist</a></b></tt>
+        
+
+.<br>
+         
+<tt><b>&amp;spectral_dynamics_nml   lon_max = 192, lat_max = 96,
+                       num_fourier = 63, num_spherical = 64 /</b></tt>
+   
+</dd>
+</dl>   
+
+
+<dl>
+<dt>    
+     
+<tt><b>Change the model time step</b></tt>
+  
+</dt>
+<dd>  
+      If the model resolution is changed it may be necessary to also change
+      the model time step. The time step for the atmospheric model is set in
+      the namelist for the main program, which can be found in the <a href="#the%20runscript">runscripts</a>.
+      For example, in
+
+        
+	
+          <tt><b><a href="../scripts/run_bgrid">run_bgrid</a></b></tt>
+	
+
+or
+
+        
+        
+          <tt><b><a href="../scripts/run_spectral">run_spectral</a></b></tt>
+        
+
+
+the following will change the time step to 1200 seconds.<br>
+         
+<tt><b>&amp;main_nml   dt_atmos = 1200 /</b></tt>
+   
+</dd>
+</dl> 
+
+
+<dl>
+<dt>    
+     
+<tt><b>Change the domains stack size</b></tt>
+  
+</dt>
+<dd>   
+      If you increase the model resolution or are running on a small number of
+      processors, you may get the error message "<tt><b>MPP_UPDATE_DOMAINS
+      user stack overflow</b></tt>". In this case, increase the domain stack
+      size found in the core-specific namelist files. The new stack size should
+      greater than or equal to the number printed in the error message.<br>
+         
+<tt><b>&amp;fms_nml   domains_stack_size = 600000 /</b></tt>
+   
+</dd>
+</dl>   
+
+</ul>
+
+
+        
+</font>
+<br>
+<br>
+<a name="ic_restarts" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.5&nbsp;Initial conditions and restart files</font></i>
+<br>
+<br>
+<font color="#333333">
+
+The <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> uses restart files to save the exact (bit-reproducible) state of the
+model at the end of a model run. The restart files are used as an initial
+condition to continue a model run from an earlier model integration. A module
+(or package of modules) will write data to a restart file if it is needed for a
+bit-reproducible restart. The input restart files (the initial conditions) are
+read from the <tt><b>INPUT</b></tt> subdirectory. The output restart files are written to the
+<tt><b>RESTART</b></tt> subdirectory. The simple <a href="#the%20runscript">runscripts</a> create these two directories when
+setting up the model run.
+<br>
+<br>
+
+The initial condition file specified in the simple <a href="#the%20runscript">runscripts</a> is a cpio
+archive file that contains the restart files created by individual modules.
+The test cases provided with this release do not specify an initial condition
+file, but rather generate their initial states internally. The test case will
+however create output restart files, and a user may want to archive or move the
+output restart files so they can be used as an initial condition when
+continuing a model run.
+<br>
+<br>
+
+To create a cpio archive file:
+
+<br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+    cd RESTART<br> 
+    /bin/ls *.res* | cpio -ov &gt; OutputRestart.cpio 
+  </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+or, simply move the output files to the <tt><b>input</b></tt> directory:
+
+<br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+    rm INPUT/*.res*<br>  
+    mv RESTART/*.res* INPUT<br>  
+    mpirun -np 1 fms.exe # rerun the model 
+  </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+Because the restart file for the main program contains information about the
+current model time, there is no need to modify any namelist or input files
+before rerunning the model.
+<br>
+<br>
+
+The restart file created by the B-grid core is called
+<tt><b>bgrid_prog_var.res.nc</b></tt> and the restart file created by the
+spectral core is called <tt><b>spectral_dynamics.res.nc</b></tt>. Here are some
+specific details about the restart file for each core.
+<br>
+<br>
+
+Bgrid: 
+<ul>
+  
+<li>
+    May be written as (64-bit) <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> files or (machine-dependent) native
+    format files. This output option is set using a namelist variable. 
+  </li>
+<br>
+<br>
+  
+<li>
+    May be restarted from either <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> or native restart files. The model will
+    look for both file types, no namelist variable is needed.
+  </li>
+<br>
+<br>
+  
+<li>
+    The restart file contains the vertical grid, topography, and the
+    prognostic variables. 
+  </li>
+<br>
+<br>
+  
+<li>
+    The model resolution is determined from the restart file. 
+  </li>
+<br>
+<br>
+  
+<li>
+    If no restart file is present, then a cold-start initialization is
+    attempted. See the namelist options and online documentation for module
+     
+     
+       <a href="../src/atmos_bgrid/tools/bgrid_cold_start.html"><tt><b>bgrid_cold_start</b></tt></a>
+     
+     . 
+  </li>
+<br>
+<br>
+  
+<li>
+    A separate restart file is written/read for atmospheric tracers. When the
+    netCDF restart option is used a single <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> tracer restart file is
+    written. When native-format restarts are written each tracer is saved to a
+    separate file.
+  </li>
+<br>
+<br>
+
+</ul>
+
+Spectral: 
+<ul>
+  
+<li>   
+    Written only as (64-bit) <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a>. 
+  </li>
+<br>
+<br>
+  
+<li>
+    May be restarted from either <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> or native restart files. The model will
+    look for both file types, no namelist variable is needed. 
+  </li>
+<br>
+<br>
+  
+<li>
+    The restart file contains the vertical grid, topography, and the prognostic
+    variables. 
+  </li>
+<br>
+<br>
+  
+<li>
+    The model resolution is determined from namelist settings, resolution of
+    restart data is checked against that set in namelist. 
+  </li>
+<br>
+<br>
+  
+<li>
+    Model is cold-started when no restart file is present. Additional namelists
+    may optionally be supplied when cold-started. These allow the specification
+    of the vertical coordinate, initial temperature of the atmosphere, and the
+    surface height. 
+  </li>
+<br>
+<br>
+  
+<li>
+    A separate restart file is written/read for each atmospheric <a href="#the%20field%20table">tracer</a>. 
+  </li>
+<br>
+<br>
+
+</ul>
+ 
+
+        
+</font>
+<br>
+<br>
+<a name="mppnccombine" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">5.6&nbsp;mppnccombine</font></i>
+<br>
+<br>
+<font color="#333333">
+
+      Running the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> source code in a parallel processing environment
+      will produce one output <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> diagnostic file per
+      processor.&nbsp;<tt><b>mppnccombine</b></tt> joins together an
+      arbitrary number of data files containing chunks
+      of a decomposed domain into a unified <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> file.
+      If the user is running the source code on one processor,
+      the domain is not decomposed and there is only
+      one data file. <tt><b>mppnccombine</b></tt>
+      will still copy the full contents of the data file, but 
+      this is inefficient and <tt><b>mppnccombine</b></tt>
+      should not be used in this case. Executing
+      <tt><b>mppnccombine</b></tt> is automated through the  
+      <a href="#the%20runscript">
+      runscripts</a>. The data files are
+      <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> format for now, but IEEE binary may be supported
+      in the future. 
+      <br>
+<br>
+
+      
+<tt><b>mppnccombine</b></tt> requires decomposed
+      dimensions in each file to have a 
+      <i>domain_decomposition</i>
+      attribute. This attribute contains four integer values:
+      starting value of the entire non-decomposed dimension
+      range (usually 1), ending value of the entire
+      non-decomposed dimension range, starting value of the
+      current chunk's dimension range and ending value of the
+      current chunk's dimension range. <tt><b>mppnccombine</b></tt>
+      also requires that each file have a
+      <i>NumFilesInSet</i>
+      global attribute which contains a single integer value
+      representing the total number of chunks (i.e., files) to
+      combine. 
+      <br>
+<br>
+
+      The syntax and arguments of <tt><b>mppnccombine</b></tt> 
+      are as follows:
+
+
+         
+      <br>
+<br>
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b><tt>
+             mppnccombine [-v] [-a] [-r] output.nc [input ...] 
+          </tt></b></td>
+</tr>
+</table>
+</center>
+<br>
+
+
+
+      
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><i>
+             print some progress information
+          </i></td><td><b><tt>
+             -v
+          </tt></b></td>
+</tr>
+<tr>
+<td><i>
+             append to an existing <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> file
+          </i></td><td><b><tt>
+             -a
+          </tt></b></td>
+</tr>
+<tr>
+<td><i>
+             remove the '.####' decomposed files
+             after a successful run
+          </i></td><td><b><tt>
+             -r
+          </tt></b></td>
+</tr>
+</table>
+</center>
+<br>     
+
+      An output file must be specified and it is
+      assumed to be the first filename argument. If the output
+      file already exists, then it will not be modified unless
+      the option is chosen to append to it. If no input files
+      are specified, their names will be based on the name
+      of the output file plus the extensions '.0000', '.0001',
+      etc. If input files are specified, they are assumed
+      to be absolute filenames. A value of 0 is returned if
+      execution is completed successfully and a value of 1
+      indicates otherwise.
+      <br>
+<br>
+
+      The source of <tt><b>mppnccombine</b></tt> is packaged
+      with the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> <tt><b>atm_dycores</b></tt> code in
+      the <tt><b>postprocessing</b></tt> directory. 
+      <tt><b>mppnccombine.c</b></tt>
+      should be compiled on the platform where the user
+      intends to run the <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> Jakarta atmospheric dynamical core source code so
+      the <a href="#the%20runscript">runscript</a> can call it.
+      A C compiler and <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> library
+      are required for compiling <tt><b>mppnccombine.c</b></tt>.
+
+
+<ul>
+  
+<li>
+     Change to the <tt><b>postprocessing</b></tt> directory:<br>
+     
+<tt><b>cd postprocessing</b></tt>
+  
+</li>
+<br>
+<br>
+  
+<li>
+     Compile <tt><b>mppnccombine</b></tt>:<br>
+  
+<tt><b>
+     cc -O -o mppnccombine -I/usr/local/include -L/usr/local/lib mppnccombine.c
+     -lnetcdf
+  </b></tt>
+ 
+</li>
+<br>
+<br>
+ 
+<li>
+     Move <tt><b>mppnccombine</b></tt> to the <tt><b>bin</b></tt> directory:<br>
+ 
+<tt><b>mv mppnccombine ../bin</b></tt>
+ 
+</li>
+<br>
+<br>
+
+</ul>
+
+
+
+        
+</font>
+<br>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="examining%20output" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">6.&nbsp;Examining output<br>
+</font></i></b>
+<table cellpadding="4">
+<tr>
+<td><a href="#top"><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/contents2.gif"></a></td><td>
+    &nbsp;&nbsp;
+    <a href="#model%20output" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">6.1&nbsp;Model output</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#displaying%20the%20output" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">6.2&nbsp;Displaying the output</a>
+<br>
+    &nbsp;&nbsp;
+    <a href="#ncview" style="
+        text-decoration:none;color:#660000;font-style:italic
+      ">6.3&nbsp;ncview</a>
+<br>
+</td>
+</tr>
+</table>
+<br>
+<a name="model%20output" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">6.1&nbsp;Model output</font></i>
+<br>
+<br>
+<font color="#333333">
+
+Output from a <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> model run will be written to the directory where the model
+was run. FMS models write output in ASCII, binary, and <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> formats. Ascii or
+text output files have the <tt><b>*.out</b></tt> suffix. For example, files of
+the form <tt><b>*integral.out</b></tt> contain global integrals and
+<tt><b>logfile.out</b></tt> contains the namelist and revision number output. Note
+that the spectral model does not produce <tt><b>*integral.out</b></tt> files.
+Standard output and standard error messages created by the model may be
+directed to a file called <tt><b>fms.out</b></tt>. The diagnostics files,
+specified in the diagnostics table, are written as <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> files with the 
+<tt><b>*.nc</b></tt> suffix. The output restart files are written to the
+subdirectory <tt><b>RESTART</b></tt> and will have the <tt><b>*.res.nc</b></tt> or 
+<tt><b>*.res</b></tt> suffix.
+<br>
+<br>
+
+You may download sample output data for comparison at <a href="https://fms.gfdl.noaa.gov/projects/fms/">https://fms.gfdl.noaa.gov/projects/fms/</a>.
+Each tar file expands to a directory containing a readme file along with
+netcdf and ascii output. The files <tt><b>bgrid_output.tar.gz</b></tt> and <tt><b>spectral_output.tar.gz</b></tt> contain daily snapshots of surface pressure through
+ the 200 day spinup period and time means of all fields over the 200 to 1200
+ day period. The files <tt><b>barotropic_output.tar.gz</b></tt> and <tt><b>shallow_output.tar.gz</b></tt> contain thirty days of diagnostic output for the spectral
+barotropic model and spectral shallow water model, respectively.
+<br>
+<br>
+
+
+        
+</font>
+<br>
+<br>
+<a name="displaying%20the%20output" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">6.2&nbsp;Displaying the output</font></i>
+<br>
+<br>
+<font color="#333333">
+
+There are several graphical packages available to display the model output. These packages widely vary depending on factors, such as the number of dimensions, the amount and complexity of options available and the output data format. The data will first have to be put into a common format that all the package can read. <a href="http://www.gfdl.noaa.gov/~fms">FMS</a> requires the data to be stored in <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> format since it is so widely supported for scientific visualization. The graphical package is also dependent upon the computing environment. This section will discuss a two-dimensional browser that is used on workstations, <tt><b>ncview</b></tt>. Please reference <a href="http://www.gfdl.noaa.gov/~jps/GFDL_Vis_Guide.html"> GFDL's Scientific Visualization Guide</a> for information on additional graphical packages. 
+<br>
+<br>
+
+
+
+         
+</font>
+<br>
+<br>
+<a name="ncview" style="
+          text-decoration:none;color:crimson;font-style:italic
+        "></a><i><font size="+1" color="#660000">6.3&nbsp;ncview</font></i>
+<br>
+<br>
+<font color="#333333">
+
+<tt><b>ncview</b></tt> is a visual browser for <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> data format files and displays a two-dimensional, color representation of single precision floating point data in a <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> file. You can animate the data in time by creating simple movies, flip or enlarge the picture, scan through various axes, change colormaps, etc. <tt><b>ncview</b></tt> is not a plotting program or an analysis package. Thus, contour lines, vectors, legend/labelbar, axis/tic-marks and geography are not included. The user is unable to perform X-Z or Y-Z cross-sections, unless there is a fourth dimension, time. Rather, <tt><b>ncview's</b></tt> purpose is to view data stored in <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a> format files quickly, easily and simply. 
+<br>
+<br>
+
+
+<tt><b>ncview</b></tt> is capable of short user spin-up, fast cross sectioning, magnification, predefined color palettes which can be inverted and 'scrunched' to highlight high or low values, animation along the least quickly varying dimension only with speed control and printing. It also has the ability to read a series of files as input, such as a sequence of snapshot history files. A time series graph for variables pops up by clicking the mouse at a specific point. Other options include a mouse-selectable colormap endpoints with optional reset, map overlay and a filter for one-dimensional variables.
+<br>
+<br>
+
+
+
+
+In <tt><b>ncview</b></tt>, the user can <tt><b>&lt;left-click&gt;</b></tt> on any point in a plot to get a graph of the variable verses time at that point. Also, <tt><b>&lt;Ctrl&gt;&lt;left-click&gt;</b></tt> on any point to set the colormap minimum to the value at that point, while <tt><b>&lt;Ctrl&gt;&lt;right-click&gt;</b></tt> on any point will set the colormap maximum to the value at that point. Use the "Range" button to set (or reset) the colormap min/max. For additional information on <tt><b>ncview</b></tt>, refer to the <tt><b>ncview</b></tt> UNIX manual page (<tt><b>man ncview</b></tt>) or the <a href="http://meteora.ucsd.edu/~pierce/ncview_home_page.html"> <tt><b>ncview</b></tt> homepage</a>.
+<br>
+<br>
+
+
+
+        
+</font>
+<br>
+<br>
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<a name="performance" style="
+        text-decoration:none;color:crimson;font-style:italic
+      "></a><b><i><font size="+2" color="crimson">7.&nbsp;Performance<br>
+</font></i></b>
+<br>
+
+The test cases provided with this release have been run on the SGI Origin 3800 large-scale cluster at the <a href="http://www.gfdl.noaa.gov">Geophysical Fluid Dynamics Lab</a>. The table below summaries the performance for each of the test cases. 
+<br>
+<br>
+
+
+<center>
+<table NOSAVE="" BGCOLOR="#FFCCFF">
+<tr>
+<td><b>
+      Model
+    </b></td><td><b>
+      Resolution
+    </b></td><td><b>
+      Run length (days)
+    </b></td><td><b>
+      # pe
+    </b></td><td><b>
+      Time (sec)
+    </b></td>
+</tr>
+<tr>
+<td>
+       bgrid
+    </td><td>
+       N45 (144 x 90 x 20) 
+    </td><td> 
+       200
+    </td><td>
+       30
+    </td><td>
+       3995
+    </td>
+</tr>
+<tr>
+<td>
+       spectral
+    </td><td> 
+       T42 (128 x 64 x 20) 
+    </td><td> 
+       200
+    </td><td>
+       16
+    </td><td>
+       1760
+    </td>
+</tr>
+<tr>
+<td>
+       barotropic
+    </td><td>
+       T85 (256 x 128)
+    </td><td> 
+       30
+    </td><td>
+       16
+    </td><td>
+       50
+    </td>
+</tr>
+<tr>
+<td>
+       shallow
+    </td><td>
+       T85 (256 x 128) 
+    </td><td> 
+       30
+    </td><td>
+       16
+    </td><td>
+       50
+    </td>
+</tr>
+</table>
+</center>
+<br>      
+
+
+        
+<hr WIDTH="100%">
+<table align="right" border="0" cellpadding="0">
+<tr>
+<td><a href="#top" style="
+               text-decoration:none;font-style:italic;font-weight:800
+             "><img border="0" src="http://www.gfdl.noaa.gov/~lat/fms_public_release/manual_files/general/up.gif">          
+                Back to top
+        </a></td>
+</tr>
+</table>
+<br>
+<br>
+<i><font size="-1">
+     Last modified: 10-09-2003 15:12:14. &nbsp;
+  </font></i>
+<br>
+<i><font size="-1">Send comments/suggestions to 
+    <a href="mailto:Lori.Thompson@noaa.gov">Lori Thompson</a></font></i>
+<!--#exec cmd="echo $DOCUMENT_NAME $REMOTE_HOST'@'$REMOTE_ADDR `date` >>/home/lat/public_html/guestbooks/user_guide_guestbook"-->
+</body>
+</html>

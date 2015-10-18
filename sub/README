@@ -1,0 +1,27 @@
+fms submission shell script - for LSF jobs
+written by Tobias Bischoff, September 2014
+
+Instructions:
+1. Create a experiment directory (exp/'exp_name'/) with a run_exp file in exp/'exp_name'/run/.
+The run_exp file should have run_name = RUN_NAME.
+All experiments will use namelist values from run_exp unless they are modified in list_exp.
+
+2. Make a list of experiments to run in list_exp. For example, to do a sweep over odp, the parameter
+multiplying the longwave optical depth, the list would look like:
+
+default_idealized odp 1.0
+default_idealized odp 2.0
+default_idealized odp 3.0
+default_idealized odp 4.0 
+
+As many namelist parameters as needed can be specified in this way, but all will show up in the run 
+name, creating long filenames.
+
+(e.g., an experiment listed as 'default_idealized odp 1.0 del_sol = 1.6' will have the run name
+default_idealized_odp_1.0_del_sol_1.6)
+
+3. Submit all jobs at once by going to the fms_default/sub/ folder and typing 'sh run_exp.sh'
+
+4. A file list_exp_submitted will automatically be created which lists the experiments with the time 
+of submission.
+

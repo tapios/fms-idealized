@@ -1,0 +1,504 @@
+      SUBROUTINE BMSHAL(						    &
+	   NSHAL,    CBMTS,    KDX					    &
+	  ,NLON,     NLEV,     NLEVM1,	 NLEVP1				    &
+	  ,CPD,	     G,	       RD,	 TMELT				    &
+	  ,C2ES,     C3LES,    C4LES					    &
+	  ,APP1,     APHP1						    &
+	  ,PTP1,     PQP1						    &
+	  ,PDT,	     PDQ,      PSC					    &
+	  ,KBASE,    KTOP						    &
+	  ,KHCTOP,   KLOBAS,  sztref, sztref1, ztsum0, ztsum1       
+	  )
+
+        real, intent(in) ::    cbmts,    cpd,      g,        rd             &
+          ,tmelt,    c2es,     c3les,    c4les    
+
+        integer, intent(in) :: nshal,    nlon,     nlev,     nlevm1         &
+          ,nlevp1
+
+        integer, intent(out) :: khctop,   klobas
+
+!
+!**** *BMSHAL* - PERFORMS SATURATION POINT ADJUSTMENT
+!		 FOR SHALLOW CONVECTION.
+!
+!     ORIGINAL VERSION		       B.RITTER	 E.C.M.W.F.  31/10/84.
+!     IMPLEMENTED & TUNED IN UGCM1   J.M.SLINGO	 U.G.A.M.P.	12/91.
+!     IMPLEMENTED IN UGCM2	    M.BLACKBURN	 U.G.A.M.P.  13/05/94.
+!
+!     PURPOSE.
+!     --------
+!
+!	   THIS ROUTINE ADJUSTS THE TEMPERATURE AND SPECIFIC HUMIDITY
+!     PROFILES OF SHALLOW CONVECTIVE POINTS TO AN INTERNALLY SPECIFIED
+!     REFERENCE PROFILE.
+!
+!**   INTERFACE.
+!     ----------
+!
+!	   *BMSHAL* IS CALLED FROM *BMADJ*.
+!	   THE ROUTINE IS ARGUMENT DRIVEN, TAKING ITS INPUT ENTIRELY
+!     FROM THE VARIABLES AND ARRAYS SUPPLIED IN THE ARGUMENT LIST.
+!     FOR VECTORISATION, THE INPUT IS GATHERED IN TEMPORARY ARRAYS OF
+!     LENGTH *NSHAL* (THE NUMBER OF GRIDPOINTS WITH SHALLOW CONVECTION
+!     ON A LATITUDE ROW) USING INDEX ARRAY *KDX*.  THE ROUTINE RETURNS
+!     ITS OUTPUT AS ARGUMENTS, HAVING SCATTERED TO THE FULL GRID.
+!
+!  ---------------------------------------------------------------------
+!
+!	   INPUT ARGUMENTS:
+!
+!     *NSHAL*	NUMBER OF GRIDPOINTS WITH SHALLOW CONVECTION IN ROW.
+!     *CBMTS*	ADJUSTMENT TIMESCALE IN SECONDS FOR SHALLOW CONVECTION.
+!     *KDX*	INDEX OF CONVECT. POINTS ON FULL GRID, DIMENSION (NLON).
+!     *NLON*	NUMBER OF LONGITUDES.
+!     *NLEV*	NUMBER OF LEVELS.
+!     *NLEVM1*	(NLEV-1).
+!     *NLEVP1*	(NLEV+1).
+!     *CPD*	SPECIFIC HEAT AT CONSTANT PRESSURE FOR DRY AIR.
+!     *G*	GRAVITATIONAL ACCELERATION.
+!     *RD*	GAS CONSTANT FOR DRY AIR.
+!     *TMELT*	TEMPERATURE OF FUSION OF ICE.
+!     *C__ES*	CONSTANTS USED FOR COMPUTATION OF SATURATION SPECIFIC
+!		HUMIDITY OVER LIQUID WATER (*C_LES*) OR ICE (*C_IES*).
+!     *C2ES*	(RD/RV)*(SVP AT REFERENCE TEMPERATURE C4_ES).
+!     *C3_ES*	CONSTANT FOR SVP.
+!     *C4_ES*	REFERENCE TEMPERATURE FOR SVP.
+!     *APP1*	FULL LEVEL PRESSURE,		  DIMENSION (NLON,NLEV).
+!     *APHP1*	HALF LEVEL PRESSURE,		DIMENSION (NLON,NLEVP1).
+!     *PTP1*	PRELIMINARY (T+1) TEMPERATURE,	  DIMENSION (NLON,NLEV).
+!     *PQP1*	PRELIMINARY (T+1) SPECIFIC HUMID, DIMENSION (NLON,NLEV).
+!     *KBASE*	HIGHEST LEVEL IN SUB-CLOUD LAYER,      DIMENSION (NLON).
+!     *KTOP*	HIGHEST LEVEL IN CLOUD LAYER,	       DIMENSION (NLON).
+!
+!	   OUTPUT ARGUMENTS:
+!
+!     *PDT*	TEMPERATURE TENDENCY,		  DIMENSION (NLON,NLEV).
+!     *PDQ*	SPECIFIC HUMIDITY TENDENCY,	  DIMENSION (NLON,NLEV).
+!     *PSC*	CONDENSATION RATE,		       DIMENSION (NLON).
+!     *KHCTOP*	UPPERMOST LEVEL AT WHICH TENDENCIES ARE COMPUTED.
+!     *KLOBAS*	LOWEST LEVEL AT WHICH TENDENCIES ARE COMPUTED.
+!
+!  ---------------------------------------------------------------------
+!*ENDIF
+!	   OUTPUT ARRAYS ARE ONLY ASSIGNED AT SHALLOW CONVECTING POINTS.
+!     ALL ARRAY ELEMENTS SHOULD BE PRESET TO ZERO ON INPUT.
+!
+!     METHOD.
+!     -------
+!
+!	   THE BASIC REFERENCE PROFILE IS DEFINED BY THE SATURATION
+!     POINTS OF THE LOWEST LEVEL AND A LEVEL ABOVE THE INVERSION.
+!     THESE DETERMINE THE MIXING LINE.	THE STRENGTH OF THE INVERSION
+!     IS CONSIDERED AS WELL. THE REFERENCE PROFILES ARE CONSTRAINED
+!     BY THE REQUIREMENT OF CONSERVATION OF SENSIBLE AND LATENT HEAT
+!     SEPERATELY.
+!	   FINALLY HEATING RATES AND MOISTURE CHANGES ARE CALCULATED
+!     AS A RELAXATION TO THE ADJUSTMENT PROFILE.  NOTE THAT TENDENCIES
+!     ARE APPLIED UP TO THE INVERSION LEVEL ABOVE THE INPUT CLOUD TOP.
+!     ******************************************************************
+!     * N.B.  THE RELAXATION TIME *ZTAU* IS RESOLUTION DEPENDENT.      *
+!     * SEE COMMENTS BELOW WHERE THIS PHYSICAL CONSTANT IS DEFINED.    *
+!     ******************************************************************
+!
+!     EXTERNALS.
+!     ----------
+!
+!	   *ALLOCA*  ALLOCATE ARRAY SPACE (MEMORY MANAGER ROUTINE).
+!	   *GATHER*  GATHER SELECTED ARRAY ELEMENTS INTO A VECTOR.
+!		     (CRAY LIBRARY ROUTINE).
+!	   *SCATTER* SCATTER A VECTOR INTO SELECTED ARRAY ELEMENTS.
+!		     (CRAY LIBRARY ROUTINE).
+!	   *UNLOC*   FREE ARRAY SPACE (MEMORY MANAGER ROUTINE).
+!
+!     REFERENCES.
+!     -----------
+!
+!	   A BASIC DESCRIPTION OF THE METHOD CAN BE FOUND IN BETTS
+!     (1986 : QJRMS 112, 677-691) AND BETTS & MILLER (1986 : QJRMS,
+!     112, 693-709).
+!	   A MORE DETAILED DESCRIPTION OF THE SCHEME IS CONTAINED IN
+!     BETTS & MILLER (1994 : AMERICAN METEOROLOGICAL SOCIETY MONOGRAPH
+!     ON CONVECTIVE PARAMETRIZATION).
+!	   IMPLEMENTATION OF THE SCHEME IN THE UGAMP GCM IS DESCRIBED
+!     IN UGAMP TECHNICAL REPORT NO. 25 (SLINGO & BLACKBURN, 1992).
+!
+!	   SATURATION POINT CALCULATIONS FOLLOW BOLTON (1980, MON. WEA.
+!     REV., 108, 1046-1053).  SATURATION SPECIFIC HUMIDITY CALCULATIONS
+!     USE THE TETENS FORMULA (LOWE, 1977, J.APPL.MET., 16, 100-103).
+!
+!     ------------------
+      LOGICAL LO,LOA,LOB
+!     ------------------
+!
+      REAL								    &
+	   APP1	 (NLON,NLEV)						    &
+	  ,APHP1 (NLON,NLEVP1)						    &
+	  ,PTP1	 (NLON,NLEV)						    &
+	  ,PQP1	 (NLON,NLEV)						    &
+	  ,PDT	 (NLON,NLEV)						    &
+	  ,PDQ	 (NLON,NLEV)						    &
+	  ,PSC	 (NLON)
+!
+
+      real	  sztref (nlon,nlev), sztref1 (nlon,nlev)
+      real	  ztsum0(nlon), ztsum1(nlon)
+
+      INTEGER								    &
+	   KDX	 (NLON)							    &
+	  ,KTOP	 (NLON)							    &
+	  ,KBASE (NLON)
+!
+      real, dimension(nshal, nlev) ::				            &
+	   zpp1s							    &
+	  ,zphp1s							    &
+	  ,ztp1s							    &
+	  ,zqp1s							    &
+	  ,ztref							    &
+	  ,zqref							    &
+	  ,zdp	 
+!      
+      integer, dimension(nshal) ::					    &
+	   itops							    &
+	  ,ibases							    
+!
+      real, dimension(nshal) ::						    &
+	   zdts								    &
+	  ,zdqs								    &
+	  ,zmix								    &
+	  ,zbinv							    &
+	  ,ztsum							    &
+	  ,zqsum							    &
+	  ,zqint							  
+!
+      real :: xlg, arg1, arg2
+      XLG(ARG1,ARG2)=EXP(ARG2*ALOG(ARG1))
+
+!     local variables
+!     ----- ---------
+!
+      real ::        ztau,     zspdiff,  zbitop,   zbmin,    zbmax          &
+          ,zbshal,   zstabm,   zpzero,   zepdsp,   zepmix,   zepq           &
+          ,zcons1,   zcons2,   zcons3,   zc1,      zc2,      zc3            &
+          ,zc4,      zc5,      zc6,      zc7,      zptopm1                  &
+          ,zttopm1,  zqtopm1,  zptopp1,  zqtopp1,  zdptop,   zqnlm1         &
+          ,zqmx,     zthmx,    zzt,      zp1,      ztsp,     zsp1           &
+          ,zspt,     zthbot,   zspti,    zttopp1,  ztmx,     zdpmix         &
+          ,zspbi,    zbeta,    zsp,      zts,      zcond,    zspl 
+
+      integer ::     jk,       jl,       itopm1,   itopp,    itopp1         &
+           ,ibot
+!
+!*    PHYSICAL CONSTANTS.
+!     -------- ----------
+!
+!     *ZTAU*	  RELAXATION TIMESCALE IN SECONDS.
+!		  ****************************************************
+!		  * THE ADJUSTMENT TIMESCALE IS RESOLUTION DEPENDENT *
+!		  * *ZTAU* DETERMINES THE RATE AT WHICH MOISTURE IS  *
+!		  * TRANSFERRED THROUGH THE PBL AND INTO THE FREE    *
+!		  * ATMOSPHERE.	 IT HAS BEEN TESTED AND TUNED IN THE *
+!		  * UGAMP GCM, TOGETHER WITH *ZTAU* AND *ZALPHA* IN  *
+!		  * *BMDEEP*, ONLY AT HORIZONTAL RESOLUTIONS UP TO   *
+!		  * T42.					     *
+!		  *		 T21	   T42			     *
+!		  * *ZTAU*	14400	  14400			     *
+!		  ****************************************************
+!     *ZSPDIFF*	  SATURATION POINT DIFFERENCE FOR THE LOWEST LEVEL.
+!     *ZBITOP*	  MIXING PARAMETER FOR THE INVERSION.
+!     *ZBMIN*	  MINIMUM LIMIT OF INVERSION MIXING PARAMETER.
+!     *ZBMAX*	  MAXIMUM LIMIT OF INVERSION MIXING PARAMETER.
+!     *ZBSHAL*	  MIXING PARAMETER.
+!     *ZSTABM*	  MIXING LINE WEIGHT.
+!     *ZPZERO*	  REFERENCE PRESSURE FOR DRY ADIABATS.
+!
+      ZTAU=CBMTS
+      ZSPDIFF=-5000.
+      ZBITOP=1.2
+      ZBMIN=1.0
+      ZBMAX=2.5
+      ZBSHAL=1.0
+      ZSTABM=0.85
+      ZPZERO=100000.
+
+!
+!*    SECURITY CONSTANTS.
+!     -------- ----------
+!
+!     *NLEVM1*	  (DUMMY ARGUMENT)  LOWEST CLOUD BASE ALLOWED.
+!     *ZEPDSP*	  MINIMUM SATURATION POINT DIFFERENCE OVER LAYER,
+!		  TO AVOID DIVIDE BY ZERO.
+!     *ZEPMIX*	  MINIMUM VALUE OF MIXING LINE GRADIENT.
+!     *ZEPQ*	  MINIMUM SPECIFIC HUMIDITY TO AVOID DIVERGENCE OF THE
+!		  SATURATION POINT CALCULATIONS.
+!
+      ZEPDSP=-1.E-2
+      ZEPMIX=-0.0007
+      ZEPQ=0.000002
+!
+!*    COMPUTATIONAL CONSTANTS.
+!     ------------- ----------
+!
+!     *ZC1-ZC5*	  CONSTANTS FOR SATURATION POINT CALCULATIONS.
+!     *ZC6*	  (RD/RV) USED FOR VAPOUR PRESSURE.
+!     *ZC7*	  (1-RD/RV) USED FOR VAPOUR PRESSURE.
+!
+      ZCONS1=RD/CPD
+      ZCONS3=1./ZTAU
+!
+      ZC1=CPD/RD
+      ZC2=55.
+      ZC3=2840.
+      ZC4=3.5
+      ZC5=0.2
+      ZC6=0.622
+      ZC7=0.378
+!
+!     ------------------------------------------------------------------
+!
+!*	   1.	  ALLOCATE SPACE AND POSITION VARIABLES.
+!		  -------- ----- --- -------- ----------
+!
+  100 CONTINUE
+!
+!     ------------------------------------------------------------------
+!
+!*	   2.	  COLLECT SHALLOW CONVECTIVE POINTS.
+!		  ------- ------- ---------- -------
+!
+  200 CONTINUE
+!
+      CALL GATHER_ii(NSHAL, ITOPS,  KTOP,  KDX)
+      CALL GATHER_ii(NSHAL, IBASES, KBASE, KDX)
+!
+!*	   2.1	  FIND LOWEST CLOUD-BASE AND HIGHEST TOP.
+!		  MODIFY ALL BASES TO FIRST IN-CLOUD LEVEL.
+!		  MODIFY ALL TOPS TO INCLUDE INVERSION LEVEL.
+!
+  210 CONTINUE
+!
+      KLOBAS=1
+      KHCTOP=NLEV
+      DO 211 JL=1,NSHAL
+      ITOPS(JL)=ITOPS(JL)-1
+      IBASES(JL)=IBASES(JL)-1
+      KLOBAS=MAX(KLOBAS,IBASES(JL))
+      KHCTOP=MIN(KHCTOP,ITOPS(JL))
+  211 CONTINUE
+!
+!		  GATHER MULTI-LEVEL ARRAYS UP TO THE SECOND LEVEL
+!		  ABOVE THE ORIGINAL HIGHEST CLOUD-TOP, WHICH IS
+!		  USED FOR THE MIXING LINE CALCULATIONS.
+!
+      DO 212 JK=KHCTOP-1,NLEV
+      CALL GATHER_ir(NSHAL,ZTP1S (:,JK),PTP1 (:,JK),KDX)
+      CALL GATHER_ir(NSHAL,ZQP1S (:,JK),PQP1 (:,JK),KDX)
+      CALL GATHER_ir(NSHAL,ZPP1S (:,JK),APP1 (:,JK),KDX)
+      CALL GATHER_ir(NSHAL,ZPHP1S(:,JK),APHP1(:,JK),KDX)
+  212 CONTINUE
+!
+!     ------------------------------------------------------------------
+!
+!*	   3.	  PRELIMINARY REFERENCE PROFILE.
+!		  ----------- --------- --------
+!
+  300 CONTINUE
+!
+!	   3.1	  PRESET REFERENCE PROFILE.
+!
+      DO 312 JK=KHCTOP,NLEV
+      DO 311 JL=1,NSHAL
+      ZTREF(JL,JK)=ZTP1S(JL,JK)
+      ZQREF(JL,JK)=ZQP1S(JL,JK)
+  311 CONTINUE
+  312 CONTINUE
+!
+!	   3.2	  SINGLE LEVEL CALCULATIONS FOR MIXING LINE.
+!
+  320 CONTINUE
+!
+      DO 321 JL=1,NSHAL
+!
+!		  UPPER LEVEL T AND Q FOR MIXING LINE.
+!
+      ITOPM1=ITOPS(JL)-1
+      ITOPP=ITOPS(JL)
+      ITOPP1=ITOPS(JL)+1
+      ZPTOPM1=ZPP1S(JL,ITOPM1)
+      ZTTOPM1=ZTP1S(JL,ITOPM1)
+      ZQTOPM1=MAX(ZEPQ,ZQP1S(JL,ITOPM1))
+      ZPTOPP1=ZPP1S(JL,ITOPP1)
+      ZTTOPP1=ZTP1S(JL,ITOPP1)
+      ZQTOPP1=MAX(ZEPQ,ZQP1S(JL,ITOPP1))
+      ZDPTOP=ZPP1S(JL,ITOPP)-ZPP1S(JL,ITOPM1)
+      ZQNLM1=MAX(ZEPQ,ZQP1S(JL,NLEVM1))
+!
+!		  MEAN THETA AND Q FOR MIXING LINE.
+!
+      ZQMX=0.5*(ZQTOPM1+ZQNLM1)
+      ZTHMX=0.5*(ZTTOPM1*XLG((ZPZERO/ZPTOPM1),ZCONS1)+			    &
+	    ZTP1S(JL,NLEVM1)*XLG((ZPZERO/ZPP1S(JL,NLEVM1)),ZCONS1))
+      ZTMX=ZTHMX*XLG((ZPTOPM1/ZPZERO),ZCONS1)
+!
+!		  SATURATION POINT FOR NLEVM1.
+!
+      ZZT=ZTP1S(JL,NLEVM1)
+      ZP1=ZQNLM1*ZPP1S(JL,NLEVM1)/(ZC6+ZC7*ZQNLM1)
+      ZTSP=ZC2+ZC3/(ZC4*ALOG(ZZT)-ALOG(ZP1)-ZC5)
+      ZSPL=ZPP1S(JL,NLEVM1)*XLG((ZTSP/ZZT),ZC1)
+!
+!		  SATURATION POINT FOR UPPER MIXING LEVEL.
+!
+      ZP1=ZQMX*ZPTOPM1/(ZC6+ZC7*ZQMX)
+      ZTSP=ZC2+ZC3/(ZC4*ALOG(ZTMX)-ALOG(ZP1)-ZC5)
+      ZSPT=ZPTOPM1*XLG((ZTSP/ZTMX),ZC1)
+!
+!		  SLOPE OF MIXING LINE.
+!
+      ZDPMIX=MIN(ZSPT-ZSPL,ZEPDSP)
+      ZTHBOT=ZTP1S(JL,NLEVM1)*XLG((ZPZERO/ZPP1S(JL,NLEVM1)),ZCONS1)
+      ZMIX(JL)=(ZTHMX-ZTHBOT)/ZDPMIX
+      ZMIX(JL)=MAX(ZEPMIX,MIN(ZMIX(JL),0.))
+!
+!		  SATURATION POINT FOR LEVEL ABOVE INVERSION.
+!
+      ZP1=ZQTOPM1*ZPTOPM1/(ZC6+ZC7*ZQTOPM1)
+      ZTSP=ZC2+ZC3/(ZC4*ALOG(ZTTOPM1)-ALOG(ZP1)-ZC5)
+      ZSPTI=ZPTOPM1*XLG((ZTSP/ZTTOPM1),ZC1)
+!
+!		  SATURATION POINT FOR LEVEL BELOW INVERSION.
+!
+      ZP1=ZQTOPP1*ZPTOPP1/(ZC6+ZC7*ZQTOPP1)
+      ZTSP=ZC2+ZC3/(ZC4*ALOG(ZTTOPP1)-ALOG(ZP1)-ZC5)
+      ZSPBI=ZPTOPP1*XLG((ZTSP/ZTTOPP1),ZC1)
+!
+!		  MIXING PARAMETER FOR INVERSION.
+!
+      ZBINV(JL)=ZBITOP*(ZSPBI-ZSPTI-ZDPTOP)				    &
+	       /(ZPTOPP1-ZPTOPM1-ZDPTOP)
+      ZBINV(JL)=MAX(ZBMIN,MIN(ZBMAX,ZBINV(JL)))
+!
+  321 CONTINUE
+!
+!*	   3.3	  REFERENCE TEMPERATURE AND HUMIDITY.
+!
+  330 CONTINUE
+!
+      DO 332 JK=KLOBAS,KHCTOP,-1
+      DO 331 JL=1,NSHAL
+      IF (JK.EQ.ITOPS(JL)) THEN
+	 ZBETA=ZBINV(JL)
+      ELSE
+	 ZBETA=ZBSHAL
+      ENDIF
+
+      if(zepmix.gt.min(zmix(jl),0.)) zbeta=0.0 ! beta=0 gives DALR
+
+      LOA=(JK.GE.ITOPS(JL)).AND.(JK.LT.IBASES(JL))
+      IF (LOA) THEN
+
+	 ZTREF(JL,JK)=ZTREF(JL,JK+1) + slope *	                           &
+              (ztref(JL,JK+1)*xlg((app1(jl,jk)/app1(jl,jk+1)),zcons1)-      &
+              ZTREF(JL,JK+1))
+
+!!$            ZTREF(JL,JK)=                                              &
+!!$                 (ZTREF(JL,JK+1)*XLG((ZPZERO/ZPP1S(JL,JK+1)),ZCONS1)+  &
+!!$                 ZBETA*ZSTABM*ZMIX(JL)*(ZPP1S(JL,JK)-ZPP1S(JL,JK+1)))  &
+!!$                 XLG((ZPP1S(JL,JK)/ZPZERO),ZCONS1)
+      ENDIF
+      LOB=(JK.GE.ITOPS(JL)).AND.(JK.LE.IBASES(JL))
+      IF (LOB) THEN 
+	 ZSP=ZSPDIFF-(ZBETA-1.)*(ZPP1S(JL,JK+1)-ZPP1S(JL,JK))		    &
+	     +ZPP1S(JL,JK)
+	 ZTS=ZTREF(JL,JK)*XLG((ZSP/ZPP1S(JL,JK)),ZCONS1)
+	 ZQREF(JL,JK)=C2ES*EXP(C3LES*(ZTS-TMELT)/(ZTS-C4LES))/ZSP
+      ENDIF
+  331 CONTINUE
+  332 CONTINUE
+!
+!     ------------------------------------------------------------------
+!
+!*	   4.	  CONSIDERATION OF ENERGY CONSERVATION.
+!		  ------------- -- ------ -------------
+!
+  400 CONTINUE
+!
+!*	   4.1	  SEPERATE ENERGY INTEGRALS FOR T AND Q.
+!
+  410 CONTINUE
+!
+      DO 411 JL=1,NSHAL
+      ZTSUM(JL)=0.
+      ZQSUM(JL)=0.
+      ZQINT(JL)=0.
+  411 CONTINUE
+!
+      DO 413 JK=KHCTOP,KLOBAS
+      DO 412 JL=1,NSHAL
+      ZDP(JL,JK)=ZPHP1S(JL,JK+1)-ZPHP1S(JL,JK)
+      ZTSUM(JL)=ZTSUM(JL)+(ZTP1S(JL,JK)-ZTREF(JL,JK))*ZDP(JL,JK)
+      ZQSUM(JL)=ZQSUM(JL)+(ZQP1S(JL,JK)-ZQREF(JL,JK))*ZDP(JL,JK)
+  412 CONTINUE
+  413 CONTINUE
+!
+      DO 414 JL=1,NSHAL
+      IBOT=IBASES(JL)+1
+      ITOPP=ITOPS(JL)
+      ZTSUM(JL)=ZTSUM(JL)/(ZPHP1S(JL,IBOT)-ZPHP1S(JL,ITOPP))
+      ZQSUM(JL)=ZQSUM(JL)/(ZPHP1S(JL,IBOT)-ZPHP1S(JL,ITOPP))
+  414 CONTINUE
+!
+!*	   4.2	  MODIFICATION OF PRELIMINARY REFERENCE PROFILE.
+!		  COMPUTE INTEGRATED CONDENSATION RATE.
+!
+  420 CONTINUE
+!
+      DO 422 JK=KHCTOP,KLOBAS
+      DO 421 JL=1,NSHAL
+      LO=(JK.GE.ITOPS(JL)).AND.(JK.LE.IBASES(JL))
+      IF (LO) THEN
+         ztref1(jl,jk) = ztref(jl,jk)
+	 ZTREF(JL,JK)=ZTREF(JL,JK)+ZTSUM(JL)
+	 ZQREF(JL,JK)=ZQREF(JL,JK)+ZQSUM(JL)
+	 ZCOND=(ZQREF(JL,JK)-ZQP1S(JL,JK))*ZCONS3
+	 IF (ZCOND.GT.0.) THEN
+	    ZQINT(JL)=ZQINT(JL)+ZCOND*ZDP(JL,JK)/G
+	 ENDIF
+      ENDIF
+  421 CONTINUE
+  422 CONTINUE
+!
+!     ------------------------------------------------------------------
+!
+!*	   5.	  FINAL TENDENCIES, SCATTER TO FULL GRID.
+!		  ----- ----------- ------- -- ---- -----
+!
+  500 CONTINUE
+!
+
+      DO 502 JK=KHCTOP,KLOBAS
+!
+      DO 501 JL=1,NSHAL
+      ZDQS(JL)=(ZQREF(JL,JK)-ZQP1S(JL,JK))*ZCONS3
+      ZDTS(JL)=(ZTREF(JL,JK)-ZTP1S(JL,JK))*ZCONS3
+  501 CONTINUE
+!
+      CALL SCATTER(NSHAL,PDT(:,JK),KDX,ZDTS)
+      CALL SCATTER(NSHAL,PDQ(:,JK),KDX,ZDQS)
+      call scatter(nshal,sztref(:,jk),kdx,ztref(:,jk))
+      call scatter(nshal,sztref1(:,jk),kdx,ztref1(:,jk))
+!
+  502 CONTINUE
+!
+      CALL SCATTER(NSHAL,PSC,KDX,ZQINT)
+!
+!     ------------------------------------------------------------------
+!
+!*	   6.	  RETURN WORKSPACE.
+!		  ------ ----------
+!
+  600 CONTINUE
+!
+!
+      RETURN
+    END SUBROUTINE BMSHAL

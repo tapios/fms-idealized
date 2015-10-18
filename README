@@ -1,0 +1,50 @@
+                              === Idealized GCMs ===
+
+General structure:
+
+                                   fms_default_public
+                                          |
+                      ------------------------------------------
+                      |                   |                    |
+                 idealized               exp                analysis
+                      |                   |                    |    
+             (DO NOT MODIFY src)          |            
+                                          |
+                   ----------------------------------------------
+                   |                      |                     | 
+                 exp1                   exp2                  exp3...
+                                          |
+           ------------------------------------------------------------------
+           |                              |                                 |
+         input                           run                             srcmods
+           |                              |                                 |
+   namelists, diag table             run_scripts         put here any modification to the source code;
+                                                       it will automatically replace any sources in src
+
+Experiments (exp1, exp2 ...) may differ by source code, and all modifications to the source code are located in the srcmods directory within the specific experiment. Once in that directory they overwrite any source code in the model directory (e.g. ~/fms_default_public/idealized/src/). Every experiment can have several runs, which share the same source code. Runs typically differ in namelist parameters.
+
+Once an experiment is run, two more directories will be created on the level of fms_default_public:
+
+1. fms_tmp: A temporary directory where the experiment will run and computations will be executed. All model output will be automatically exported to fms_output once the experiment is done. Note that for speed some of the computation uses a local /scratch on the compute nodes. Unless a job is resubmitted immediately, this directory can be deleted once the run is over. For future restarts, a restart file archive (.cpio) is copied to fms_output. 
+
+2. fms_output: Contains three directories:
+2.1. history: 4xday and 1x10days output of the model (output frequency and diagnostics can be adjusted at exp?/input/diag_table).
+2.2. logfiles: logfiles from each output stage.
+2.3. restart: restart files for each output stage.
+
+General instructions for setting up an experiment (adjustments for specific computer configurations will be needed).
+
+1. cd ~/fms_default_public/exp
+2. Create a duplicate directory of the default experiments. e.g.: cp -rp default_idealized test_moist_1.
+3. Copy any modifications to the source code into the srcmods directory of the new experiment.
+4. Adjust if needed any namelists or diag_tables in the run or input directories within the new experiment tree.
+5. Make sure the correct mkmf file for your specific compiler is used (e.g. ~/fms_default_public/idealized/bin/mkmf.template.ifc). For mppnccombine, which combines output files from separate processors, a GNU C++ (gcc) compiler is used.
+6. Submit job with the script in the exp?/run/ directory (e.g. qsub < run_test)
+
+The directory tree analysis contains code for computing various kinds of averages (isentropic, sigma coordinate, etc.) of flow fields simulated in an experiment.
+
+Farid Ait Chaalal, Ian Eisenman, Yohai Kaspi, Xavier Levine, Tim Merlis, April 2011--October 2012
+
+
+
+

@@ -1,0 +1,119 @@
+=== Description of script default_moist/run/run_test ===
+
+This is the default run script for the idealized_moist GCM. See description
+of the model version at ~/fms/README.
+
+This script assumes the following hierarchical structure for FMS
+model simulations:
+The variable ${exp_name} refers to the experiment. Experiments are
+builds of the model, which typically each have different source code.
+The variable ${run_name} refers to the individual run of a given
+experiment. Runs typically each have different parameters.
+The directory ~/fms contains only model input.
+Run scripts are named ~/fms/exp/${exp_name}/run/run_${run_name}.
+Initial unprocessed output is put in ~/fms_tmp/${exp_name}/${run_name}.
+Final analyzed data output is put in
+${home}/fms_output/${exp_name}/${run_name}/.
+
+The length of each model run is ${days}. Long runs can be created by
+doing a series of consecutive iterations, each of length
+${days}. There are two counters in the script, $irun and $ireload. The
+former is used to do multiple iterations of the model in a single
+submission of the run script. The latter is used to do multiple
+iterations by resubmitting the run script. Either method should be
+equivalent.
+
+Each iteration of the model run script is followed by a submission of
+the analysis code (called by the model run script), which makes
+a temporal (and optionally zonal) mean of the results. The version of
+the analysis code is specified in the $analysis_version variable. By
+default the analysis code does a temporal mean of the entire iteration
+of the run. It is also possible to do time-mean analyses of individual
+time segments of the run (typically to consider a seasonal cycle) by
+varying ${days_per_segment}.
+
+To facilitate comparison between different versions of the model, all
+changes to gcm source code should be done in the srcmods/ directory
+only.
+
+Ian Eisenman, Yohai Kaspi, Tim Merlis, November 2010
+
+=== Update of March 2012 === 
+       
+- Dry and moist models are running from the same source. model_type has 
+  to be set as "dry" or "moist". The parameters for the physical 
+  parametrizations are defined in the namelists from line 210.  
+  ~/fms/exp/${exp_name}/input contains other namelists in namelists_dry 
+  and namelists_moist corresponding respectively to the dry and to the moist 
+  model. 
+- Possibility to choose between 2d (zonally averaged) or 3d (zonally varying)  
+  outputs  (variable ${analysis_type})       
+- Implementation of the RAW filter (Zhihong Tan) to improve the RA filter. 
+  The robert parameter has not been changed. The RAW filter introduces an 
+  additional positive filter parameter smaller than 1 (a value of 1 
+  corresponds to the RA filter). It has been set at 0.53 and can be
+  modified in spectral_dynamics.nml declared in the namelist files
+  in ~/fms/exp/${exp_name}/input. The RAW filter is described and tested in
+  "Williams, P. D., 2011: Mon. Wea. Rev., 137, 1996-2007" and tested
+  in a GCM similar to ours in "Amezuca J. et al. Mon. Wea. Rev., 139, 
+  608-619"
+- New variable names in the 2d analysis (Xavier Levine). See the 
+  wiki page of the group for more details: 
+  http://saturn.gps.caltech.edu/index.php?title=Main_Page 
+
+Farid Ait Chaalal, Xavier Levine, Zhihong Tan, February 2012
+
+
+=== Update of August/September 2012 === 
+
+- Possibility of using a bucket model for the hydrology. $model_type has
+  to be set at "moist_hydro" in the run_test
+- Two-stream radiation scheme allows annual cycle and orbital cycles
+- Implementation of the exponential filter (Sep 26 2012: still has
+  to be checked).
+- Updates in the analysis (spectral budget of EKE and APE, surface drag,
+  bucket variable for the "moist_hydro" version of the GCM)
+
+Farid Ait Chaalal, Xavier Levine, Junjun liu, September 2012
+
+=== Update of August 2013 ===
+
+- Runscripts and mkmk files are included customized for 2 local systems,
+Brutus at ETH Zurich, and Fram at Caltech
+- The queueing system is LSF on Brutus versus PBS on Fram.
+- Affected files are in fms_default/analysis/analysis_*/run, 
+fms_default/exp/*/run, and fms_default/idealized/bin/. Comparing between
+files labeled as Brutus (or left blank) and files labelled as Fram should 
+give an idea which lines need to be changed when importing to a different 
+local system
+
+Robert Wills and Zhihong Tan, August 2013
+
+=== Update of June 2014 ===
+
+- ${machine} flag added for BSUB machines such that a mkmf template can be
+referenced and the intel, openmpi, and netcdf modules loaded can be customized 
+for the machine being used. Currently this is set up for Brutus and Euler at ETH
+Zurich
+- Modified to work on specified ${tmpdir1} instead of home directory. This work
+directory should be set to local scratch space where there is space to keep files 
+up to 10s of TB temporarily. The necessary output and restart files are copied 
+to the home directory after the analysis completes.
+- gaussian_topog_nml is placed in runscript to make it easier to enable topography
+- added ${ocean_mask} which can reference an ocean_mask nc-file if load_mask = 
+.true. (Ori Adam)
+
+Robert Wills, June 2014
+
+=== Update of September 2014 ===
+
+- Update for Euler - no longer copies fms_tmp back to home directory since the home 
+directory is backed up. Keep fms_output and fms_tmp on global scratch. It will not
+be deleted without notification, but it is best to regularly back up to Napuka.
+- To facilitate storage, only two restart files are kept in 
+fms_tmp/*/*/output/restart
+- Fixed bug due to splitting of spectral_dynamics_nml between the run script and
+the namelist in input. Namelists cannot be split or the one in input will not be 
+read
+
+Robert Wills, September 2014

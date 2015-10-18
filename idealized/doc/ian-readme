@@ -1,0 +1,15 @@
+=== conv_gray_orbital_seaice ===
+
+Moist idealized atmospheric GCM with slab ocean. Can be run in
+perpetual equinox or with seasonally varying solar forcing, and in the
+latter case Earth's orbital parameters can be specified. Sea ice
+component (optional) is included.
+
+Model namelists are in input/ directory:
+diag_table (list of diagnostics to be computed)
+spectral_pathnames (paths to source code files)
+spectral_namelist ()
+
+This is mostly X version of dynamic core. File structure (using expt
+folder for namelist and runscript files, rather than having input/ and
+script/ folders) is from X version of dynamic core.

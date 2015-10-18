@@ -1,0 +1,3 @@
+* Simulations need to be spun up from T85 resoluation for 20000 Earth days. 
+* The end states of the T85 simulations will be used as initial states of T213 simulations.
+* T213 simulations need to be integrated for at least 30000 Earth days to reach steady states.  

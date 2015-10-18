@@ -1,0 +1,394 @@
+
+MPP module $Id mpp.F90 $$Name: latest $
+MPP started with NPES=  16
+Using MPI library for message passing...
+Realtime clock resolution=  1.0000E-06 sec (   1000000 ticks/sec)
+Clock rolls over after   9.2234E+12 sec ( 9223372036854775806 ticks)
+
+MPP module $Id mpp_parameter.F90 $$Name: latest $
+
+MPP module $Id mpp_data.F90 $$Name: latest $
+
+MPP_DOMAINS module $Id: mpp_domains.F90,v 13.0 2006/03/28 21:42:16 fms Exp $$Name: latest $
+
+MPP_IO module $Id: mpp_io.F90,v 13.0 2006/03/28 21:42:28 fms Exp $
+MPP_IO module $Name: latest $
+
+Using netCDF library version 3.6.0-p1 of Nov 26 2005 18:21:50 $
+ &FMS_IO_NML
+ FMS_NETCDF_OVERRIDE     = T,
+ FMS_NETCDF_RESTART      = T,
+ THREADING_READ  = multi                           ,
+ FILESET_READ    = single                          ,
+ THREADING_WRITE = single                          ,
+ FILESET_WRITE   = single                          ,
+ FORMAT  = netcdf                          ,
+ READ_ALL_PE     = T,
+ IOSPEC_IEEE32   = -N ieee_32                                                      ,
+ MAX_FILES_W     =          40,
+ MAX_FILES_R     =          40,
+ READ_DATA_BUG   = F
+ /
+
+================================================================================
+$Id: fms_io.F90,v 13.0 2006/03/28 21:39:14 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: fms.f90,v 13.0 2006/03/28 21:39:10 fms Exp $
+$Name: latest $
+ &FMS_NML
+ READ_ALL_PE     = T,
+ CLOCK_GRAIN     = NONE            ,
+ CLOCK_FLAGS     = NONE            ,
+ WARNING_LEVEL   = warning ,
+ IOSPEC_IEEE32   = -N ieee_32                                                      ,
+ STACK_SIZE      =           0,
+ DOMAINS_STACK_SIZE      =      600000,
+ PRINT_MEMORY_USAGE      = F
+ /
+ nml_error_codes=           0
+
+================================================================================
+$Id: constants.f90,v 13.0 2006/03/28 21:37:37 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: field_manager.F90,v 10.0 2003/10/27 23:31:04 arl Exp $
+$Name:  $
+
+================================================================================
+$Id: tracer_manager.F90,v 10.0 2003/10/27 23:31:05 arl Exp $
+$Name:  $
+ ----------------------------------------------------
+ Contents of tracer entry            1
+ Model type and field name
+ Model                :            1
+ Field name           : sphum
+ Tracer family        : orphan
+ Tracer units         : kg/kg
+ Tracer longname      : specific humidity
+ Tracer is_prognostic :  T
+ Tracer is_family     :  F
+ Tracer is_combined   :  F
+ Tracer field         : not associated
+ Tracer tendency      : not associated
+ Tracer tlevels       : not associated
+ ----------------------------------------------------
+Number of tracers in field table for atmospheric model =    1
+
+================================================================================
+$Id: atmos_model.f90,v 10.0 2003/10/27 23:31:04 arl Exp $
+$Name:  $
+ &MAIN_NML
+ CURRENT_TIME    = 4*0,
+ DT_ATMOS        =         600,
+ DAYS    =          90,
+ HOURS   =           0,
+ MINUTES =           0,
+ SECONDS =           0,
+ OVERRIDE        = F
+ /
+  current time used = day 1080 hour  0:00:00
+Number of tracers =  1
+Number of prognostic tracers =  1
+Number of diagnostic tracers =  0
+
+================================================================================
+$Id: time_manager.F90,v 13.0 2006/03/28 21:43:20 fms Exp $
+$Name: latest $
+ &DIAG_MANAGER_NML
+ APPEND_PELIST_NAME      = F,
+ MIX_SNAPSHOT_AVERAGE_FIELDS     = T,
+ MAX_OUTPUT_FIELDS       =         300,
+ MAX_INPUT_FIELDS        =         300,
+ MAX_AXES        =          60,
+ DO_DIAG_FIELD_LOG       = F,
+ WRITE_BYTES_IN_FILE     = F,
+ DEBUG_DIAG_MANAGER      = F
+ /
+
+================================================================================
+$Id: diag_axis.f90,v 13.0 2006/03/28 21:37:49 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: diag_manager.f90,v 13.1 2006/04/25 23:23:27 fms Exp $
+$Name: latest $
+base date used =    0 day  0  0:00:00 gmt
+
+================================================================================
+$Id: atmosphere.f90,v 13.0 2006/03/28 21:17:28 fms Exp $
+$Name: latest $
+ &ATMOSPHERE_NML
+ TURB    = T,
+ LDRY_CONVECTION = F,
+ LWET_CONVECTION = T,
+ ROUGHNESS_HEAT  =  1.000000000000000E-005,
+ TWO_STREAM      = T,
+ MIXED_LAYER_BC  = T,
+ ROUGHNESS_MOIST =  1.000000000000000E-005,
+ ROUGHNESS_MOM   =  5.000000000000000E-003,
+ DO_VIRTUAL      = T,
+ TAPIO_FORCING   = F,
+ DRY_MODEL       = F,
+ HS      = F,
+ ATMOS_WATER_CORRECTION  = F,
+ BUCKET  = T,
+ LOAD_MASK       = T,
+ INIT_BUCKET_DEPTH       =   1000.00000000000     ,
+ INIT_BUCKET_DEPTH_LAND  =   1.00000000000000     ,
+ LAND_LEFT       =  0.000000000000000E+000, 9*-100.000000000000       ,
+ LAND_RIGHT      =   360.000000000000     , 9*-100.000000000000       ,
+ LAND_BOTTOM     =   10.0000000000000     , 9*-100.000000000000       ,
+ LAND_TOP        =   30.0000000000000     , 9*-100.000000000000       ,
+ ROBERT_BUCKET   =  4.000000000000000E-002,
+ RAW_BUCKET      =  0.530000000000000     ,
+ MAX_BUCKET_DEPTH_LAND   =   2.00000000000000     ,
+ DAMPING_COEFF_BUCKET    =   200.000000000000     
+ /
+
+================================================================================
+$Id: spectral_dynamics.f90,v 13.0 2006/03/28 21:18:07 fms Exp $
+$Name: latest $
+ &SPECTRAL_DYNAMICS_NML
+ USE_VIRTUAL_TEMPERATURE = F,
+ DAMPING_OPTION  = resolution_dependent                                            ,
+ CUTOFF_WN       =          15,
+ DAMPING_ORDER   =           2,
+ DAMPING_COEFF   =  1.157407410000000E-004,
+ DAMPING_ORDER_VOR       =          -1,
+ DAMPING_COEFF_VOR       =  -1.00000000000000     ,
+ DAMPING_ORDER_DIV       =          -1,
+ DAMPING_COEFF_DIV       =  -1.00000000000000     ,
+ DO_MASS_CORRECTION      = T,
+ DO_WATER_CORRECTION     = T,
+ DO_ENERGY_CORRECTION    = T,
+ VERT_ADVECT_UV  = second_centered                                                 ,
+ VERT_ADVECT_T   = second_centered                                                 ,
+ USE_IMPLICIT    = T,
+ LONGITUDE_ORIGIN        =  0.000000000000000E+000,
+ ROBERT_COEFF    =  4.000000000000000E-002,
+ ALPHA_IMPLICIT  =  0.500000000000000     ,
+ VERT_DIFFERENCE_OPTION  = simmons_and_burridge                                            ,
+ REFERENCE_SEA_LEVEL_PRESS       =   101325.000000000     ,
+ LON_MAX =         128,
+ LAT_MAX =          64,
+ NUM_LEVELS      =          18,
+ NUM_FOURIER     =          42,
+ NUM_SPHERICAL   =          43,
+ FOURIER_INC     =           1,
+ TRIANG_TRUNC    = T,
+ TOPOGRAPHY_OPTION       = flat                                                            ,
+ VERT_COORD_OPTION       = even_sigma                                                      ,
+ SCALE_HEIGHTS   =   4.00000000000000     ,
+ SURF_RES        =  0.100000000000000     ,
+ P_PRESS =  0.100000000000000     ,
+ P_SIGMA =  0.300000000000000     ,
+ EXPONENT        =   2.50000000000000     ,
+ OCEAN_TOPOG_SMOOTHING   =  0.930000000000000     ,
+ INITIAL_SPHUM   =  0.000000000000000E+000,
+ VALID_RANGE_T   =   100.000000000000     ,   500.000000000000     ,
+ EDDY_SPONGE_COEFF       =  0.000000000000000E+000,
+ ZMU_SPONGE_COEFF        =  0.000000000000000E+000,
+ ZMV_SPONGE_COEFF        =  0.000000000000000E+000,
+ PRINT_INTERVAL  =           1,           0,
+ NUM_STEPS       =           1,
+ RAW_FACTOR      =  0.750000000000000     ,
+ DO_NO_EDDY_EDDY = T,
+ DO_SPEC_TRACER_FILTER   = F
+ /
+
+================================================================================
+$Id: tracer_type.f90,v 11.0 2004/09/28 19:30:05 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: transforms.f90,v 13.0 2006/03/28 21:18:36 fms Exp $
+$Name: latest $
+ &TRANSFORMS_NML
+ CHECK_FOURIER_IMAG      = F
+ /
+
+================================================================================
+$Id: spec_mpp.f90,v 13.0 2006/03/28 21:18:27 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: spherical_fourier.f90,v 13.0 2006/03/28 21:18:33 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: spherical.f90,v 13.0 2006/03/28 21:18:30 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: gauss_and_legendre.f90,v 10.0 2003/10/24 22:01:02 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: grid_fourier.f90,v 11.0 2004/09/28 19:30:50 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: fft.F90,v 10.0 2003/10/27 23:31:04 arl Exp $
+$Name:  $
+
+================================================================================
+$Id: press_and_geopot.f90,v 13.0 2006/03/28 21:17:59 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: every_step_diagnostics.f90,v 13.0 2006/03/28 21:17:44 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: fv_advection.f90,v 13.0 2006/03/28 21:17:47 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: spectral_damping.f90,v 13.0 2006/03/28 21:18:04 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: implicit.f90,v 13.0 2006/03/28 21:17:54 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: mixed_layer.f90 $
+$Name:  $
+ &MIXED_LAYER_NML
+ EVAPORATION     = T,
+ QFLUX_AMP       =  0.000000000000000E+000,
+ DEPTH   =   1.00000000000000     ,
+ DEPTH_LAND      =   40.0000000000000     ,
+ QFLUX_WIDTH     =   16.0000000000000     ,
+ LOAD_QFLUX      = F,
+ EKMAN_LAYER     = F
+ /
+
+================================================================================
+$Id: vert_diff.f90,v 1.6 2002/07/16 22:37:36 fms Exp $
+$Name: havana $
+Tracer number for specific humidity =   1
+
+================================================================================
+$Id: lscale_cond.f90,v 1.2 2000/07/28 20:16:39 fms Exp $
+$Name: havana $
+ &LSCALE_COND_NML
+ HC      =   1.00000000000000     ,
+ DO_EVAP = F
+ /
+
+================================================================================
+$Id: qe_moist_convection.f90,v 1 2010/09/30 00:00:00 fms Exp $
+$Name: fez $
+ &QE_MOIST_CONVECTION_NML
+ TAU_BM  =   7200.00000000000     ,
+ RHBM    =  0.700000000000000     ,
+ TMIN    =   50.0000000000000     ,
+ TMAX    =   450.000000000000     ,
+ VAL_INC =  1.000000000000000E-002
+ /
+
+================================================================================
+$Id: radiation.f90 $
+homemade
+ &RADIATION_NML
+ ALBEDO_VALUE    =  0.380000000000000     ,
+ LW_LINEAR_FRAC  =  0.200000000000000     ,
+ SOLAR_CONSTANT  =   1360.00000000000     ,
+ DEL_SOL =   1.20000000000000     ,
+ LW_TAU0_EQTR    =   7.20000000000000     ,
+ LW_TAU0_POLE    =   1.80000000000000     ,
+ ATM_ABS =  0.220000000000000     ,
+ LW_TAU_EXPONENT =   4.00000000000000     ,
+ SW_TAU_EXPONENT =   2.00000000000000     ,
+ PERPETUAL_EQUINOX       = T,
+ ANNUAL_MEAN     = F,
+ FIXED_DAY       = F,
+ FIXED_DAY_VALUE =   90.0000000000000     ,
+ DAYS_IN_YEAR    =   360.000000000000     ,
+ ORB_YEAR        =  1.000000000000000E+036,
+ ORB_ECC =  0.000000000000000E+000,
+ ORB_OBL =   23.5000000000000     ,
+ ORB_LONG_PERH   =  0.000000000000000E+000
+ /
+
+================================================================================
+$Id: vert_turb_driver.f90,v 1.6 2002/07/16 22:37:45 fms Exp $
+$Name: havana $
+ &VERT_TURB_DRIVER_NML
+ DO_SHALLOW_CONV = F,
+ DO_MELLOR_YAMADA        = F,
+ GUST_SCHEME     = constant                ,
+ CONSTANT_GUST   =   1.00000000000000     ,
+ USE_TAU = T,
+ DO_MOLECULAR_DIFFUSION  = F
+ /
+
+================================================================================
+$Id: surface_flux.f90,v 1.7 2002/07/16 22:47:25 fms Exp $
+$Name: havana $
+ &SURFACE_FLUX_NML
+ NO_NEG_Q        = F,
+ USE_VIRTUAL_TEMP        = T,
+ ALT_GUSTINESS   = F,
+ GUST_CONST      =   1.00000000000000     ,
+ USE_MIXING_RATIO        = F
+ /
+
+================================================================================
+$Id: monin_obukhov.f90,v 1.7 2002/07/16 22:33:43 fms Exp $
+$Name: havana $
+ &MONIN_OBUKHOV_NML
+ RICH_CRIT       =   2.00000000000000     ,
+ NEUTRAL = F,
+ DRAG_MIN        =  1.000000000000000E-005,
+ STABLE_OPTION   =           1,
+ ZETA_TRANS      =  0.500000000000000     
+ /
+
+================================================================================
+$Id: diffusivity.f90,v 1.4 2002/07/16 22:32:04 fms Exp $
+$Name: havana $
+ &DIFFUSIVITY_NML
+ FIXED_DEPTH     = F,
+ DEPTH_0 =   5000.00000000000     ,
+ FRAC_INNER      =  0.100000000000000     ,
+ RICH_CRIT_PBL   =   1.00000000000000     ,
+ ENTR_RATIO      =  0.000000000000000E+000,
+ PARCEL_BUOY     =  0.000000000000000E+000,
+ ZNOM    =   1000.00000000000     ,
+ FREE_ATM_DIFF   = F,
+ FREE_ATM_SKYHI_DIFF     = F,
+ PBL_MCM = F,
+ RICH_CRIT_DIFF  =  0.250000000000000     ,
+ MIX_LEN =   30.0000000000000     ,
+ RICH_PRANDTL    =   1.00000000000000     ,
+ BACKGROUND_M    =  0.000000000000000E+000,
+ BACKGROUND_T    =  0.000000000000000E+000,
+ AMPNS   = F,
+ AMPNS_MAX       =  1.000000000000000E+020,
+ DO_VIRTUAL_NON_MCM      = T
+ /
+
+================================================================================
+$Id: global_integral.f90,v 13.0 2006/03/28 21:17:51 fms Exp $
+$Name: latest $
+
+================================================================================
+$Id: vert_advection.f90,v 10.0 2003/10/27 23:31:04 arl Exp $
+$Name:  $
+
+================================================================================
+$Id matrix_invert.f90 $
+$Name: latest $
+
+================================================================================
+$Id leapfrog.f90 $
+$Name: latest $
+
+================================================================================
+$Id: diag_output.f90,v 13.0 2006/03/28 21:38:03 fms Exp $
+$Name: latest $

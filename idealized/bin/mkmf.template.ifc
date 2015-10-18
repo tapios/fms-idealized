@@ -1,0 +1,9 @@
+# template for the Intel fortran compiler
+# typical use with mkmf
+# mkmf -t template.ifc -c"-Duse_libMPI -Duse_netCDF" path_names /usr/local/include
+FC = /opt/intel/Compiler/11.1/064/bin/intel64/ifort
+LD = /opt/intel/Compiler/11.1/064/bin/intel64/ifort
+FFLAGS = -convert big_endian -safe_cray_ptr -ftz -i4 -r8 -fpp -O2 -I$(fms_home)/bin/nc_inc -I/opt/mpich-mx-intel11/include -D__IFC
+LDFLAGS = -L$(fms_home)/bin/nc_lib -lnetcdf -L/opt/mpich-mx-intel11/lib -lmpich -L/opt/mx2g/lib64 -lmyriexpress
+CFLAGS = -I$(fms_home)/bin/nc_inc -I/opt/mpich-mx-intel11/include -D__IFC
+# ian: note that run_test appends definition of fms_home to end of template.

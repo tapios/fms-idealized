@@ -1,0 +1,51 @@
+=== Description of script analysis_2d/run/run_analysis_moist_2d ===
+
+This version of the run script is called automatically by the fms
+run script from a directory specific to a single integration of the
+model (e.g., fms_tmp/default_idealized/test/analysis/day0040h00). If
+the analysis fails, the script can be called again by going to that
+directory and then running this script (using the full path to its
+location).
+
+The script does the following:
+(1) Copy the GCM output (atmosphere and surface) of each individual
+    processor from the model output directory (normally in
+    ~/fms_tmp/..../combine) to the /scratch directory of the compute
+    processor on which the analysis is being run and combine the
+    files.
+(2) Run the analysis program on the atmosphere output,
+    still working in /scratch.
+(3) Move the analyzed model history and surface output onto the data
+    directory and delete files from /scratch.
+(4) If the analysis is determined to have been successful, remove
+    original files from model output directory (~/fms_tmp/..../combine).
+
+Ian Eisenman, Yohai Kaspi, Tim Merlis, November 2010
+
+
+Update by Xavier Levine, February 2012: 
+
+New variable names in the 2d analysis. See the wiki page of the group for 
+more details: http://saturn.gps.caltech.edu/index.php?title=Main_Page 
+
+
+Update by Robert Wills, September 2012:
+
+New variables in 3d analysis mostly follow that in 2d analysis. For a 
+complete listing including differences with 3d see the wiki page: 
+http://saturn.gps.caltech.edu/index.php?title=Main_Page 
+
+There are now over 125 variable, in order to speed up analysis time, 
+it may be helpful to change eddy_fluxes or isentrope to .false. in the 
+run file in ~/fms_default/analysis/analysis_3d/run/ if these variables 
+are not needed
+
+Update by Robert Wills and Zhihong Tan, August 2013:
+
+Includes run scripts for Brutus (unlabelled) and Fram
+
+Update by Robert Wills, June 2014:
+
+Modified to work with runscript modifications which keep all fms_tmp files 
+on a specified scratch disk and move fms_tmp restart and execuatble files 
+to specified home directory when analysis is completed.

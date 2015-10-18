@@ -1,0 +1,4 @@
+Each folder contains 1 year of output files after spinning up the respective model for 3 years. The logfiles detail the namelist values used. These files can be used for comparison to make sure the model is running properly on your machine.
+
+All simulations were performed on EULER (ETH Zurich) by Robb Wills with the version of the code published 3 July 2014. 
+
