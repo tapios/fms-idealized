@@ -1,5 +1,0 @@
-rsync -rluav --compress --delete --cvs-exclude --exclude="*~" --exclude=".*" --exclude="**.res.nc" --exclude="UPDATE_WWW" --exclude="*exe**" --include="**" --exclude="*" ~/Desktop/Code/fms_default_public/ ~/Desktop/WWW/gcms/fms_default_public
-cd ~/Desktop/WWW/gcms/
-rm -f fms_default_public.zip
-zip -r fms_default_public.zip fms_default_public
-
