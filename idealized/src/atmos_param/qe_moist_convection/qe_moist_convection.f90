@@ -13,6 +13,8 @@ module qe_moist_convection_mod
   ! virtual temperature effects in the convection scheme and not
   ! approximating the relation between vapor pressure and specific
   ! humidity.) 
+  !
+  ! Written by Remi Lam and Tapio Schneider
   !----------------------------------------------------------------------
   use            fms_mod, only:  file_exist, error_mesg, open_file,  &
                                  check_nml_error, mpp_pe, FATAL,  &
