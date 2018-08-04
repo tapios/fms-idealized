@@ -1,3 +1,4 @@
+04-Aug-2018    Fixed a bug in diffusivity.f90, which could lead to different diffusivities for different domain decompositions across processors (Paul O'Gorman)
 20-Feb-2015    Corrected an error in the way hyperviscous damping for grid tracers was calculated in spectral_dynamics.f90. 
 	       (This previously could lead to noise in tracer fields when damping was applied to tracers advected by a finite volume scheme.)
 

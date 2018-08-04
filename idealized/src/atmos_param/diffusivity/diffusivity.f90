@@ -253,7 +253,6 @@ else
    z_surf(:,:) = z_half(:,:,nlev+1)
 end if
 
-
 !compute density profile, and heights relative to surface
 do k = 1, nlev
 
@@ -449,12 +448,21 @@ call mo_diff(h_inner        , u_star, b_star, k_m_ref         , k_t_ref)
 call mo_diff(zm(:,:,kk:nlev), u_star, b_star, k_m(:,:,kk:nlev), k_t(:,:,kk:nlev))
 
 do k = 2, nlev
+
   where(zm(:,:,k) >= h_inner .and. zm(:,:,k) < h) 
     factor = (zm(:,:,k)/h_inner)* &
              (1.0 - (zm(:,:,k) - h_inner)/(h - h_inner))**2
     k_m(:,:,k) = k_m_ref*factor
     k_t(:,:,k) = k_t_ref*factor
   end where
+
+! POG change: avoid possibility of k_m and k_t set to non-zero values above PBL due to use of maxval(h_inner) above 
+  where(zm(:,:,k) >= h) 
+    k_m(:,:,k) = 0
+    k_t(:,:,k) = 0
+  end where
+! end POG change
+
 end do
 
 return
@@ -495,7 +503,7 @@ nlev = size(z_full,3)
 k_m = 0.
 
 h_ss = depth_0
-htcrit_ss = frac_inner*h_ss 
+htcrit_ss = frac_inner*h_ss
 
 do k = 2, nlev
 
